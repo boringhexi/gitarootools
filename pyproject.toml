@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "gitarootools"
+version = "0.1.0"
+description = "command line tools to work with Gitaroo Man game data"
+license = "MIT"
+authors = ["Iris Nakamura <boringhexi@pm.me>"]
+readme = "README.md"
+repository = "https://github.com/boringhexi/gitarootools"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+tomlkit = "^0.5.8"
+importlib_resources = { version = "^1.0.2", python = "~3.6" }
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+
+[tool.poetry.scripts]
+gm-imcpack = "gitarootools.cmdline.imcpack:main"
+gm-imcunpack = "gitarootools.cmdline.imcunpack:main"
+gm-subsongconv = "gitarootools.cmdline.subsongconv:main"
+gm-subsong2subimc = "gitarootools.cmdline.subsong2subimc:main"
+gm-subsong2wav = "gitarootools.cmdline.subsong2wav:main"
+
+[build-system]
+requires = ["poetry>=1.0.0b3"]
+build-backend = "poetry.masonry.api"

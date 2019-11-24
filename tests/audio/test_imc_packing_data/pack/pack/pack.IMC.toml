@@ -1,0 +1,30 @@
+[Repack-Settings]
+patch-friendly = true
+
+[[Subsong]]
+name = "Chorus"
+loadmode = "entire"
+basefile = "chorus.wav"
+
+[[Subsong]]
+name = "DrumsLeft"
+loadmode = "entire"
+basefile = "drumsL.wav"
+    [Subsong.patch-friendly-info]
+    rawname = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    unk = [57005, 48879]
+    frames-per-block = 768
+    blocks-per-channel = 18
+
+[[Subsong]]
+name = "DrumsRight"
+loadmode = "stream"
+basefile = "chorus.wav"
+channels-2-to-1 = "drumsL.wav"
+channels-1-to-2 = "drumsL.wav"
+
+[[Subsong]]
+name = "DrumsLChorusR"
+loadmode = "stream"
+basefile = "drumsL.wav"
+channels-2 = "chorus.wav"

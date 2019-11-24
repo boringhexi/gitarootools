@@ -1,0 +1,86 @@
+# Welcome to the gm-imcpack repacking file, for all your IMC repacking needs!
+# When you ran gm-imcunpack on an IMC audio container file from Gitaroo Man, it spat out
+# a bunch of .sub.imc subsongs and this file.
+# So, what now? You can make some changes, repack it into an IMC container, and
+# reinsert it into the game. Typically you will:
+#  1. Use gm-subsong2wav to convert some .sub.imc subsongs to WAV format.
+#  2. Edit them to your liking in a program like Audacity.
+#  3. Change some of the "basefile" entries below to point to the edited WAV files.
+#  3b. Or instead, you can uncomment and use the "channels-#" entries to replace only
+#      specific channels with those from the edited WAV files.
+#      (See ["Subsong Help/Guide"] below to see when and why this is recommended.)
+#  4. Run `gm-imcpack <this directory or this file>` to repack the IMC audio container.
+#  5. There's no convenient way to reinsert this file, so for now you'll have to copy it
+#     in a hex editor and paste it directly into the original spot of the Gitaroo Man
+#     ISO file.
+#  6. You can create a binary diff patch (such as xdelta) between the original game and
+#     your modified version, then send the patch to someone else so they can patch it
+#     onto their copy of the game.
+
+["Subsong Help/Guide"]
+    # This section doesn't do anything. It's just a guide to help you edit the real
+    # Subsong entries below.
+    name = "A_INT"
+    # name: Used internally in Gitaroo Man. Must be 16 ascii characters or less.
+    loadmode = "stream"
+    # loadmode: Memory loading mode, either "stream" or "entire".
+    # "stream" will load only part at a time as it plays, typically used for music.
+    # "entire" will load the whole thing in advance, typically used for sound effects.
+    basefile = "00.A_INT.sub.imc"
+    # basefile: Audio file containing this subsong's audio.
+    # Option 1: You can change this to point to another file (such as a WAV file).
+    # Option 2: You can use this file as-is and override only specific channels with
+    # another file's (see below). If you don't need to modify every channel, Option 2 is
+    # recommended because when you recompress a channel, it adds recompression noise and
+    # increases the size of the binary diff patch.
+    channels-56 = "00.A_INT.wav"
+    # channels-#: Use this file's # channels to override the basefile's # channels.
+    # In this example, channels 5 and 6 of this WAV file will override channels 5 and 6
+    # of the basefile above. (Note: channels are numbered starting from 1, not 0.)
+    channels-12-to-56 = "00.A_INT.wav"
+    # channels-#-to-#: An alternative to the above. In this example, channels 1 and 2 of
+    # this file will override channels 5 and 6 of the basefile, in that order.
+    # (Advanced usage: Use multiple "channels-#" or "channels-#-to-#" entries to get
+    # channels from more than one input file.)
+    [patch-friendly-info]
+    # Everything in this section can be safely left alone. It was automatically filled
+    # with data from the original game. When [Repack-Settings].patch-friendly = true,
+    # this data is used to match the original game data, reducing binary patch size.
+
+[Repack-Settings]
+    # Settings used by gm-imcpack during the repacking process. Comment out an entry to
+    # disable it. (These can also be overridden by passing the relevant arguments to
+    # gm-imcrepack.)
+    patch-friendly = true
+    # patchfriendly: If this entry exists and is true, the repacked IMC container will
+    # closely match the layout of original, resulting in a smaller binary diff patch.
+    # (This uses the [patch-friendly-info] sections below, ignoring any missing sections
+    # or info.)
+    max-size = "TODO"
+    # max-size: If this entry exists, gm-imcpack will warn you if the repacked IMC
+    # container exceeds this size (size of the original file). Good to know when you are
+    # pasting the repacked IMC container directly into the Gitaroo Man ISO in a hex
+    # editor.
+
+[[Subsong]]
+name = "apple1"
+loadmode = "stream"
+basefile = "00.apple1.sub.imc"
+# channels-12 = "replacement-audio.wav"
+    [Subsong.patch-friendly-info]
+    rawname = [97, 112, 112, 108, 101, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    unk = [0, 0]
+    frames-per-block = 768
+    blocks-per-channel = 9
+
+[[Subsong]]
+name = "apple2"
+loadmode = "entire"
+basefile = "01.apple2.sub.imc"
+# channels-12 = "replacement-audio.wav"
+    [Subsong.patch-friendly-info]
+    rawname = [97, 112, 112, 108, 101, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    unk = [0, 0]
+    frames-per-block = 768
+    blocks-per-channel = 9
+
