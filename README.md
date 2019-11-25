@@ -1,4 +1,4 @@
-#gitarootools — command line tools to work with Gitaroo Man game data
+# gitarootools — command line tools to work with Gitaroo Man game data
  
 *Gitaroo Man* is a rhythm action video game for PlayStation 2. This set of tools allows
 you to work with data from the game, converting game files to more viewable formats. In
