@@ -21,6 +21,18 @@ from gitarootools.miscutils.extutils import IMCTOML_EXT, SUBSONG_FORMATS
 SUBIMC_EXT = SUBSONG_FORMATS["subimc"]
 
 
+class ImcTomlError(Exception):
+    """base class for IMC TOML errors"""
+
+    pass
+
+
+class ChannelReplacementError(ImcTomlError):
+    """class for errors carrying out channel replacement"""
+
+    pass
+
+
 class ImcTomlWarning(UserWarning):
     """base class for IMC TOML warnings"""
 
@@ -80,9 +92,9 @@ _toml_header = """\
     # channels-#: Use this file's # channels to override the basefile's # channels.
     # In this example, channels 5 and 6 of this WAV file will override channels 5 and 6
     # of the basefile above. (Note: channels are numbered starting from 1, not 0.)
-    channels-12-to-56 = "00.A_INT.wav"
-    # channels-#-to-#: An alternative to the above. In this example, channels 1 and 2 of
-    # this file will override channels 5 and 6 of the basefile, in that order.
+    channels-43-to-56 = "00.A_INT.wav"
+    # channels-#-to-#: An alternative to the above. In this example, channels 4 and 3 of
+    # this file will override channels 5 and 6 of the basefile, in that exact order.
     # (Advanced usage: Use multiple "channels-#" or "channels-#-to-#" entries to get
     # channels from more than one input file.)
     [diff-patch-info]
@@ -106,6 +118,114 @@ _toml_header = """\
     # editor.
 
 """
+
+
+class SubsongChannelReplacer:
+    """helper class to replace a subsong.Subsong instance's channels with another's"""
+
+    def __init__(self, subsong_dest, dest_filename, dest_intname):
+        """instantiate a channel replacer for this subsong.Subsong instance
+
+        subsong_dest: a subsong.Subsong instance whose channels are to be replaced
+        The following are only used create useful error messages:
+          dest_filename: name of the file subsong_dest came from (basename only)
+          dest_name: internal name of subsong_dest (from the IMC container's entries)
+        """
+        self._already_replaced_channels = dict()
+        self._subsong_dest = subsong_dest
+        self._dest_filename = dest_filename
+        self._dest_intname = dest_intname
+
+    def _chnums_from_chstring(self, chsrepl_string):
+        """from a str like "channels-56" or "channels-43-to-56", get src/dest channels
+
+        "channels-56" returns ((5,6), (5,6))
+        "channels-43-to-56" returns ((4,3), (5,6))
+
+        chsrepl_string: a string like "channels-56" or "channels-43-to-56"
+        returns: (chanrepl_src, chanrepl_dest)
+          chanrepl_src: a tuple of ints representing source channels
+          chanrepl_dest: a tuple of ints representing destination channels
+
+        """
+        chnums_raw = chsrepl_string[len("channels-") :]  # e.g. "56" or "12-to-56"
+        if "-to-" in chnums_raw:
+            chnums_src_raw, chnums_dest_raw = chnums_raw.split("-to-", maxsplit=1)
+        else:
+            chnums_src_raw, chnums_dest_raw = chnums_raw, chnums_raw
+
+        # sanity check 1: src & dest channels are all ints
+        if not (chnums_src_raw.isdigit() and chnums_dest_raw.isdigit()):
+            raise ChannelReplacementError(
+                f"subsong {self._dest_intname}: "
+                "Channel replacement key name needs to be in a format like "
+                "'channels-56' or 'channels-12-to-56', "
+                f"not {chsrepl_string!r}"
+            )
+        # sanity check 2: same number of src and dest channels
+        if not len(chnums_src_raw) == len(chnums_dest_raw):
+            raise ChannelReplacementError(
+                f"subsong {self._dest_intname}: "
+                "Channel replacement key name in a format like "
+                "channels-12-to-56 needs an equal number of digits on "
+                'either side of "-to-", '
+                f"not {chsrepl_string!r}"
+            )
+
+        chnums_src = tuple(int(x) for x in chnums_src_raw)
+        chnums_dest = tuple(int(x) for x in chnums_dest_raw)
+        return chnums_src, chnums_dest
+
+    def replace_channels(self, subsong_src, chanrepl_string, subsong_src_filename):
+        """replce destination subsong's channels based on chanrepl_string
+
+        Channels in subsong_src replace channels in self._subsong_dest, based on
+        chanrepl_string.
+
+        subsong_src: a subsong.Subsong instance
+        chanrepl_string: a string like "channels-56" or "channels-43-to-56", specifying
+          which channels to take from subsong_src and which to replace in subsong_dest
+          (channels are numbered starting from 1)
+        subsong_src_filename: filename that subsong_src came from (basename only).
+          Only used to create useful error messages.
+        """
+        subsong_dest = self._subsong_dest
+        chnums_src, chnums_dest = self._chnums_from_chstring(chanrepl_string)
+        already_replaced_channels = self._already_replaced_channels
+
+        for chnum_src, chnum_dest in zip(chnums_src, chnums_dest):
+            if chnum_dest in already_replaced_channels:
+                prev_filename, prev_src = already_replaced_channels[chnum_dest]
+                warnings.warn(
+                    f"subsong {self._dest_intname}: "
+                    f"{self._dest_filename} channel {chnum_dest} was already "
+                    f"replaced by {prev_filename} channel {prev_src}, "
+                    "is being replaced again by "
+                    f"{subsong_src_filename} channel {chnum_src}",
+                    ChannelAlreadyReplacedWarning,
+                )
+            already_replaced_channels[chnum_dest] = (subsong_src_filename, chnum_src)
+            chidx_src = chnum_src - 1
+            chidx_dest = chnum_dest - 1
+            try:
+                subsong_dest.channels[chidx_dest] = subsong_src.channels[chidx_src]
+            except IndexError:
+                if chidx_src >= subsong_src.num_channels:
+                    oob_kind = "replacement"
+                    oob_name = subsong_src_filename
+                    oob_numchannels = subsong_src.num_channels
+                    oob_oobchannel = chnum_src
+                else:
+                    oob_kind = "basefile"
+                    oob_name = self._dest_filename
+                    oob_numchannels = subsong_dest.num_channels
+                    oob_oobchannel = chnum_dest
+                raise ChannelReplacementError(
+                    f"subsong {self._dest_intname}: "
+                    f"Channel replacement entry {chanrepl_string!r} out of bounds, "
+                    f"{oob_kind} {oob_name!r} only contains "
+                    f"{oob_numchannels} channels, not {oob_oobchannel}"
+                )
 
 
 def read_toml(tomlpath):
@@ -159,79 +279,15 @@ def read_toml(tomlpath):
         subsong.original_block_layout = (ofpb, obpc)
 
         # 5. process subsong channel replacement entries
-        already_replaced_channels = dict()
+        dest_subsong_chreplacer = SubsongChannelReplacer(subsong, ss_basefile, ss_name)
         for key, value in tomlsubsong.items():
             if key.startswith("channels-"):
-                chanrepl_filename = value
-                chanrepl_raw = key[len("channels-") :]  # e.g. "56" or "12-to-56"
-                if "-to-" in chanrepl_raw:
-                    chanrepl_rawsrc, chanrepl_rawdest = chanrepl_raw.split(
-                        "-to-", maxsplit=1
-                    )
-                else:
-                    chanrepl_rawsrc, chanrepl_rawdest = chanrepl_raw, chanrepl_raw
-                # check if entry is invalid
-                if not (
-                    set(chanrepl_rawsrc).issubset(set("123456789"))
-                    and set(chanrepl_rawsrc).issubset(set("123456789"))
-                ):
-                    raise ValueError(
-                        f"subsong {ss_name}: "
-                        "Channel replacement key name needs to be in a format like "
-                        "channels-56 or channels-12-to-56, "
-                        f"not 'channels-{chanrepl_raw}'"
-                    )
-                # another check for invalid entry
-                elif not len(chanrepl_rawsrc) == len(chanrepl_rawdest):
-                    raise ValueError(
-                        f"subsong {ss_name}: "
-                        "Channel replacement key name in a format like "
-                        "channels-12-to-56 needs equal amount of numbers on "
-                        'either side of "-to-", '
-                        "not 'channels-{chanrepl_raw}'"
-                    )
-                else:
-                    # Carry out channel replacement
-                    chanrepl_subsong = read_subsong(
-                        os.path.join(tomldir, chanrepl_filename)
-                    )
-                    chanrepl_src = (int(x) for x in chanrepl_rawsrc)
-                    chanrepl_dest = (int(x) for x in chanrepl_rawdest)
-                    for ch_src, ch_dest in zip(chanrepl_src, chanrepl_dest):
-                        if ch_dest in already_replaced_channels:
-                            prev_filename, prev_src = already_replaced_channels[ch_dest]
-                            warnings.warn(
-                                f"subsong {ss_name}: "
-                                f"{ss_basefile} channel {ch_dest} was already "
-                                f"replaced by {prev_filename} channel {prev_src}, "
-                                "is being replaced again by "
-                                f"{chanrepl_filename} channel {ch_src}",
-                                ChannelAlreadyReplacedWarning,
-                            )
-                        already_replaced_channels[ch_dest] = (chanrepl_filename, ch_src)
-                        chidx_src = ch_src - 1
-                        chidx_dest = ch_dest - 1
-                        try:
-                            subsong.channels[chidx_dest] = chanrepl_subsong.channels[
-                                chidx_src
-                            ]
-                        except IndexError:
-                            if chidx_src >= chanrepl_subsong.num_channels:
-                                oob_kind = "replacement"
-                                oob_name = chanrepl_filename
-                                oob_numchannels = chanrepl_subsong.num_channels
-                                oob_oobchannel = ch_src
-                            else:
-                                oob_kind = "basefile"
-                                oob_name = ss_basefile
-                                oob_numchannels = subsong.num_channels
-                                oob_oobchannel = ch_dest
-                            raise IndexError(
-                                f"subsong {ss_name}: "
-                                f"Channel replacement entry {key!r} out of bounds, "
-                                f"{oob_kind} {oob_name!r} only contains "
-                                f"{oob_numchannels} channels, not {oob_oobchannel}"
-                            )
+                # Carry out channel replacement
+                subsong_src_filename = value
+                subsong_src = read_subsong(os.path.join(tomldir, subsong_src_filename))
+                dest_subsong_chreplacer.replace_channels(
+                    subsong_src, key, subsong_src_filename
+                )
 
         # 6. convert to a ContainerSubsong (name, loadmode, etc)
         csubsong = ContainerSubsong(
