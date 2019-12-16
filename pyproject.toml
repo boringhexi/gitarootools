@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gitarootools"
-version = "0.1.0"
+version = "0.1.1"
 description = "command line tools to work with Gitaroo Man game data"
 license = "MIT"
 authors = ["Iris Nakamura <boringhexi@pm.me>"]
