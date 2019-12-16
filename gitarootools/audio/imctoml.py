@@ -85,19 +85,19 @@ _toml_header = """\
     # this file will override channels 5 and 6 of the basefile, in that order.
     # (Advanced usage: Use multiple "channels-#" or "channels-#-to-#" entries to get
     # channels from more than one input file.)
-    [patch-friendly-info]
+    [diff-patch-info]
     # Everything in this section can be safely left alone. It was automatically filled
-    # with data from the original game. When [Repack-Settings].patch-friendly = true,
-    # this data is used to match the original game data, reducing binary patch size.
+    # with data from the original game. If [Repack-Settings].diff-patch-friendly = true,
+    # this is used to match the original data's layout, reducing binary diff patch size.
 
 [Repack-Settings]
     # Settings used by gm-imcpack during the repacking process. Comment out an entry to
     # disable it. (These can also be overridden by passing the relevant arguments to
     # gm-imcrepack.)
-    patch-friendly = true
-    # patchfriendly: If this entry exists and is true, the repacked IMC container will
+    diff-patch-friendly = true
+    # diff-patch-friendly: If this exists and is true, the repacked IMC container will
     # closely match the layout of original, resulting in a smaller binary diff patch.
-    # (This uses the [patch-friendly-info] sections below, ignoring any missing sections
+    # (This uses the [diff-patch-info] sections below, ignoring any missing sections
     # or info.)
     max-size = 'REPLACE ME'
     # max-size: If this entry exists, gm-imcpack will warn you if the repacked IMC
@@ -119,10 +119,10 @@ def read_toml(tomlpath):
         tomldoc = tomlkit.parse(tomlfile.read())
 
     if "Repack-Settings" in tomldoc:
-        patch_friendly = tomldoc["Repack-Settings"].get("patch-friendly", False)
+        diff_friendly = tomldoc["Repack-Settings"].get("diff-patch-friendly", False)
         max_size = tomldoc["Repack-Settings"].get("max-size", None)
     else:
-        patch_friendly = False
+        diff_friendly = False
         max_size = None
 
     if "Subsong" not in tomldoc:
@@ -136,26 +136,26 @@ def read_toml(tomlpath):
         ss_loadmode = tomlsubsong["loadmode"]
         ss_basefile = tomlsubsong["basefile"]
 
-        # 2. read patch-friendly-info if desired & possible
+        # 2. read diff-patch-info if desired & possible
         ss_rawname = ss_unk1 = ss_unk2 = ofpb = obpc = None
-        if patch_friendly:
-            tomlpatchfinfo = tomlsubsong.get("patch-friendly-info", None)
-            if tomlpatchfinfo is not None:
-                if "rawname" in tomlpatchfinfo:
-                    ss_rawname = bytes(tomlpatchfinfo["rawname"])
-                if "unk" in tomlpatchfinfo:
-                    ss_unk1, ss_unk2 = tomlpatchfinfo["unk"]
-                if "frames-per-block" in tomlpatchfinfo:
-                    ofpb = tomlpatchfinfo["frames-per-block"]
-                if "blocks-per-channel" in tomlpatchfinfo:
-                    obpc = tomlpatchfinfo["blocks-per-channel"]
+        if diff_friendly:
+            tomldiffpinfo = tomlsubsong.get("diff-patch-info", None)
+            if tomldiffpinfo is not None:
+                if "rawname" in tomldiffpinfo:
+                    ss_rawname = bytes(tomldiffpinfo["rawname"])
+                if "unk" in tomldiffpinfo:
+                    ss_unk1, ss_unk2 = tomldiffpinfo["unk"]
+                if "frames-per-block" in tomldiffpinfo:
+                    ofpb = tomldiffpinfo["frames-per-block"]
+                if "blocks-per-channel" in tomldiffpinfo:
+                    obpc = tomldiffpinfo["blocks-per-channel"]
 
         # 3. read subsong from .wav or .sub.imc file
         subsongpath = os.path.join(tomldir, ss_basefile)
         subsong = read_subsong(subsongpath)
 
         # 4. restore subsong's original block layout from TOML if desired & possible
-        # (only if patch-friendly==True and this info exists in the TOML)
+        # (only if diff-patch-friendly==True and this info exists in the TOML)
         subsong.original_block_layout = (ofpb, obpc)
 
         # 5. process subsong channel replacement entries
@@ -297,16 +297,16 @@ def write_toml(imccontainer, imcname, outerdestdir, progressfunc=None):
                 )
                 tomlsubsong.add(tomlkit.comment(comment))
 
-                # Gather & add this subsong's patch-friendly-info to toml document,
+                # Gather & add this subsong's diff-patch-info to toml document,
                 # omitting anything with a None value
-                tomlpatchfinfo = tomlkit.table().indent(4)
+                tomldiffpinfo = tomlkit.table().indent(4)
                 if csubsong.rawname is not None:
                     # bytes to ints
-                    tomlpatchfinfo["rawname"] = [x for x in csubsong.rawname]
+                    tomldiffpinfo["rawname"] = [x for x in csubsong.rawname]
                 if not (csubsong.unk1, csubsong.unk2) == (None, None):
                     unk1 = 0 if csubsong.unk1 is None else csubsong.unk1
                     unk2 = 0 if csubsong.unk2 is None else csubsong.unk2
-                    tomlpatchfinfo["unk"] = [unk1, unk2]
+                    tomldiffpinfo["unk"] = [unk1, unk2]
                 # saving original block layout
                 if csubsong.original_block_layout is not None:
                     ofbp, obpc = csubsong.original_block_layout
@@ -314,11 +314,11 @@ def write_toml(imccontainer, imcname, outerdestdir, progressfunc=None):
                     # a plain ol' int to prevent indent problems when rewritten to toml
                     ofbp, obpc = int(ofbp), int(obpc)
                     if ofbp is not None:
-                        tomlpatchfinfo["frames-per-block"] = ofbp
+                        tomldiffpinfo["frames-per-block"] = ofbp
                     if obpc is not None:
-                        tomlpatchfinfo["blocks-per-channel"] = obpc
-                if tomlpatchfinfo:  # if tomlpatchfinfo is empty, we won't bother
-                    tomlsubsong.add("patch-friendly-info", tomlpatchfinfo)
+                        tomldiffpinfo["blocks-per-channel"] = obpc
+                if tomldiffpinfo:  # if tomldiffpinfo is empty, we won't bother
+                    tomlsubsong.add("diff-patch-info", tomldiffpinfo)
 
                 # noinspection PyArgumentList
                 tomldoc["Subsong"].append(tomlsubsong)

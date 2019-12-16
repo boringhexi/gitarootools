@@ -42,19 +42,19 @@
     # this file will override channels 5 and 6 of the basefile, in that order.
     # (Advanced usage: Use multiple "channels-#" or "channels-#-to-#" entries to get
     # channels from more than one input file.)
-    [patch-friendly-info]
+    [diff-patch-info]
     # Everything in this section can be safely left alone. It was automatically filled
-    # with data from the original game. When [Repack-Settings].patch-friendly = true,
-    # this data is used to match the original game data, reducing binary patch size.
+    # with data from the original game. If [Repack-Settings].diff-patch-friendly = true,
+    # this is used to match the original data's layout, reducing binary diff patch size.
 
 [Repack-Settings]
     # Settings used by gm-imcpack during the repacking process. Comment out an entry to
     # disable it. (These can also be overridden by passing the relevant arguments to
     # gm-imcrepack.)
-    patch-friendly = true
-    # patchfriendly: If this entry exists and is true, the repacked IMC container will
+    diff-patch-friendly = true
+    # diff-patch-friendly: If this exists and is true, the repacked IMC container will
     # closely match the layout of original, resulting in a smaller binary diff patch.
-    # (This uses the [patch-friendly-info] sections below, ignoring any missing sections
+    # (This uses the [diff-patch-info] sections below, ignoring any missing sections
     # or info.)
     max-size = "TODO"
     # max-size: If this entry exists, gm-imcpack will warn you if the repacked IMC
@@ -67,7 +67,7 @@ name = "apple1"
 loadmode = "stream"
 basefile = "00.apple1.sub.imc"
 # channels-12 = "replacement-audio.wav"
-    [Subsong.patch-friendly-info]
+    [Subsong.diff-patch-info]
     rawname = [97, 112, 112, 108, 101, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     unk = [0, 0]
     frames-per-block = 768
@@ -78,7 +78,7 @@ name = "apple2"
 loadmode = "entire"
 basefile = "01.apple2.sub.imc"
 # channels-12 = "replacement-audio.wav"
-    [Subsong.patch-friendly-info]
+    [Subsong.diff-patch-info]
     rawname = [97, 112, 112, 108, 101, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     unk = [0, 0]
     frames-per-block = 768
