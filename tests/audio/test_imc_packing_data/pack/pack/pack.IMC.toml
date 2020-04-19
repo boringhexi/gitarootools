@@ -2,29 +2,29 @@
 diff-patch-friendly = true
 
 [[Subsong]]
-name = "Chorus"
+name = "Piano"
 loadmode = "entire"
-basefile = "chorus.wav"
+basefile = "piano-2ch.wav"
 
 [[Subsong]]
-name = "DrumsLeft"
+name = "BrassLeft"
 loadmode = "entire"
-basefile = "drumsL.wav"
+basefile = "brassL.wav"
     [Subsong.diff-patch-info]
     rawname = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     unk = [57005, 48879]
     frames-per-block = 768
-    blocks-per-channel = 18
+    blocks-per-channel = 3
 
 [[Subsong]]
-name = "DrumsRight"
+name = "BrassRight"
 loadmode = "stream"
-basefile = "chorus.wav"
-channels-2-to-1 = "drumsL.wav"
-channels-to-2 = "drumsL.wav"
+basefile = "piano-2ch.wav"
+channels-2-to-1 = "brassL.wav"
+channels-to-2 = "brassL.wav"
 
 [[Subsong]]
-name = "DrumsLChorusR"
+name = "BrassLPianoR"
 loadmode = "stream"
-basefile = "drumsL.wav"
-channels-2 = "chorus.wav" #old way, checking backwards compatibility
+basefile = "brassL.wav"
+channels-2 = "piano-2ch.wav" #old way, checking backwards compatibility

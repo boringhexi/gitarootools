@@ -35,8 +35,10 @@ def test_imcunpack(tmpdir, capsys):
     assert (
         stdout_rest
         == """\
-  -> 'apple1'
-  -> 'apple2'
+  -> 'Piano'
+  -> 'BrassLeft'
+  -> 'BrassRight'
+  -> 'BrassLPianoR'
 """
     )
 
@@ -81,10 +83,10 @@ def test_imcpack(tmpdir, capsys):
     assert (
         stdout_rest
         == """\
-  'Chorus' ->
-  'DrumsLeft' ->
-  'DrumsRight' ->
-  'DrumsLChorusR' ->
+  'Piano' ->
+  'BrassLeft' ->
+  'BrassRight' ->
+  'BrassLPianoR' ->
 """
     )
 

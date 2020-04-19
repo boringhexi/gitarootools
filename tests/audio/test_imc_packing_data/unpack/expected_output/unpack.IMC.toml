@@ -60,24 +60,46 @@
     # or info.)
 
 [[Subsong]]
-name = "apple1"
-loadmode = "stream"
-basefile = "00.apple1.sub.imc"
+name = "Piano"
+loadmode = "entire"
+basefile = "00.Piano.sub.imc"
 # channels-12-to-12 = "replacement-audio.wav"
     [Subsong.diff-patch-info]
-    rawname = [97, 112, 112, 108, 101, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    rawname = [80, 105, 97, 110, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     unk = [0, 0]
-    frames-per-block = 768
-    blocks-per-channel = 9
+    frames-per-block = 1370
+    blocks-per-channel = 1
 
 [[Subsong]]
-name = "apple2"
+name = "BrassLeft"
 loadmode = "entire"
-basefile = "01.apple2.sub.imc"
+basefile = "01.BrassLeft.sub.imc"
 # channels-12-to-12 = "replacement-audio.wav"
     [Subsong.diff-patch-info]
-    rawname = [97, 112, 112, 108, 101, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    rawname = [66, 114, 97, 115, 115, 76, 101, 102, 116, 0, 11, 12, 13, 14, 15, 16]
+    unk = [57005, 48879]
+    frames-per-block = 768
+    blocks-per-channel = 3
+
+[[Subsong]]
+name = "BrassRight"
+loadmode = "stream"
+basefile = "02.BrassRight.sub.imc"
+# channels-12-to-12 = "replacement-audio.wav"
+    [Subsong.diff-patch-info]
+    rawname = [66, 114, 97, 115, 115, 82, 105, 103, 104, 116, 0, 0, 0, 0, 0, 0]
     unk = [0, 0]
     frames-per-block = 768
-    blocks-per-channel = 9
+    blocks-per-channel = 2
+
+[[Subsong]]
+name = "BrassLPianoR"
+loadmode = "stream"
+basefile = "03.BrassLPianoR.sub.imc"
+# channels-12-to-12 = "replacement-audio.wav"
+    [Subsong.diff-patch-info]
+    rawname = [66, 114, 97, 115, 115, 76, 80, 105, 97, 110, 111, 82, 0, 0, 0, 0]
+    unk = [0, 0]
+    frames-per-block = 768
+    blocks-per-channel = 2
 
