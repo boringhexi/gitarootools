@@ -6,7 +6,7 @@ import sys
 from gitarootools.cmdline.subsong2common import run_script
 
 
-def main(args=sys.argv[1:]):
+def main(args=tuple(sys.argv[1:])):
     """args: sequence of command line argument strings"""
     run_script("subimc", args)
 

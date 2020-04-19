@@ -13,8 +13,7 @@ import os
 import warnings
 
 import tomlkit
-
-from gitarootools.audio.imccontainer import ImcContainer, ContainerSubsong
+from gitarootools.audio.imccontainer import ContainerSubsong, ImcContainer
 from gitarootools.audio.subsong import read_subsong
 from gitarootools.miscutils.extutils import IMCTOML_EXT, SUBSONG_FORMATS
 

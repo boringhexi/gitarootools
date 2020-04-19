@@ -6,7 +6,6 @@ import filecmp
 from shlex import split as shlex_split
 
 import tomlkit
-
 from gitarootools.cmdline.imcpack import main as run_imcpack
 from gitarootools.cmdline.imcunpack import main as run_imcunpack
 from tests.common import make_contents2destdir, read_text

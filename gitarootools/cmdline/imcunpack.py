@@ -14,14 +14,15 @@ from itertools import chain
 from gitarootools.audio.imccontainer import read_imc
 from gitarootools.audio.imctoml import write_toml
 from gitarootools.miscutils.cmdutils import (
-    make_check_input_path,
     charunwrap,
+    make_check_input_path,
     wrap_argparse_desc,
 )
 from gitarootools.miscutils.extutils import IMC_EXT, IMCTOML_EXT, SUBSONG_FORMATS
 
 
 def build_argparser():
+    # noinspection PyTypeChecker
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -88,7 +89,7 @@ Examples:
     return parser
 
 
-def main(args=sys.argv[1:]):
+def main(args=tuple(sys.argv[1:])):
     """args: sequence of command line argument strings"""
     parser = build_argparser()
     parsed_args = parser.parse_args(args)

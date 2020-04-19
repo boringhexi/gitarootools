@@ -12,10 +12,10 @@ import sys
 from gitarootools.audio.imccontainer import write_imc
 from gitarootools.audio.imctoml import read_toml
 from gitarootools.miscutils.cmdutils import (
+    charunwrap,
     exit_if_no_paths,
     glob_all,
     glob_all_dirs_to_wildcards,
-    charunwrap,
     wrap_argparse_desc,
 )
 from gitarootools.miscutils.extutils import (
@@ -27,6 +27,7 @@ from gitarootools.miscutils.extutils import (
 
 
 def build_argparser():
+    # noinspection PyTypeChecker
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -84,7 +85,7 @@ Examples:
     return parser
 
 
-def main(args=sys.argv[1:]):
+def main(args=tuple(sys.argv[1:])):
     """args: sequence of command line argument strings"""
 
     parser = build_argparser()

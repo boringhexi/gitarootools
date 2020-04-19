@@ -29,6 +29,7 @@ def build_argparser_for_outformat(subsongtype):
     output_extension = SUBSONG_FORMATS[subsongtype]
 
     # create the argument parser
+    # noinspection PyTypeChecker
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter
     )

@@ -29,7 +29,7 @@ def build_argparser():
     return parser
 
 
-def main(args=sys.argv[1:]):
+def main(args=tuple(sys.argv[1:])):
     parser = build_argparser()
     parsed_args = parser.parse_args(args)
 

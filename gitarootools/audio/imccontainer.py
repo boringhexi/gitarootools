@@ -6,7 +6,7 @@ An IMC audio container file is a file type from Gitaroo Man that has the extensi
 and contains audio subsongs."""
 
 import struct
-from itertools import zip_longest, count
+from itertools import count, zip_longest
 
 from gitarootools.audio import subsong
 from gitarootools.miscutils.datautils import chunks, open_maybe, readstruct
