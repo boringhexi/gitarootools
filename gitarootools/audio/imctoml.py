@@ -113,11 +113,6 @@ _toml_header = """\
     # closely match the layout of original, resulting in a smaller binary diff patch.
     # (This uses the [diff-patch-info] sections below, ignoring any missing sections
     # or info.)
-    max-size = 'REPLACE ME'
-    # max-size: If this entry exists, gm-imcpack will warn you if the repacked IMC
-    # container exceeds this size (size of the original file). Good to know when you are
-    # pasting the repacked IMC container directly into the Gitaroo Man ISO in a hex
-    # editor.
 
 """
 
@@ -263,10 +258,8 @@ def read_toml(tomlpath):
 
     if "Repack-Settings" in tomldoc:
         diff_friendly = tomldoc["Repack-Settings"].get("diff-patch-friendly", False)
-        max_size = tomldoc["Repack-Settings"].get("max-size", None)
     else:
         diff_friendly = False
-        max_size = None
 
     if "Subsong" not in tomldoc:
         return ImcContainer([])
@@ -347,7 +340,6 @@ def write_toml(imccontainer, imcname, outerdestdir, progressfunc=None):
         try:
 
             tomldoc = tomlkit.parse(_toml_header)
-            tomldoc["Repack-Settings"]["max-size"] = "TODO"  # TODO
             tomldoc.add("Subsong", tomlkit.aot())
 
             for ssidx, csubsong in enumerate(imccontainer.csubsongs):

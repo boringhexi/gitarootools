@@ -58,11 +58,6 @@
     # closely match the layout of original, resulting in a smaller binary diff patch.
     # (This uses the [diff-patch-info] sections below, ignoring any missing sections
     # or info.)
-    max-size = "TODO"
-    # max-size: If this entry exists, gm-imcpack will warn you if the repacked IMC
-    # container exceeds this size (size of the original file). Good to know when you are
-    # pasting the repacked IMC container directly into the Gitaroo Man ISO in a hex
-    # editor.
 
 [[Subsong]]
 name = "apple1"
