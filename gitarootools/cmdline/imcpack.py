@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
 """imcpack.py - command-line tool to pack TOML+.sub.imc into IMC audio container files
 
 Can take a specially written TOML file and its subsongs, and pack it into an IMC audio
 container file.
 """
+
 import argparse
 import os
 import sys

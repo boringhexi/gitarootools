@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
+#  Copyright (c) 2008-2019 Adam Gashlin, Fastelbja, bnnm, Christopher Snowhill
 """subsong.py - read/write subsong files
 
 A "subsong" can be:
@@ -7,21 +8,9 @@ A "subsong" can be:
   Has extension .sub.imc
 - an audio file of a different format (e.g. .wav) that serves the same purpose
 """
-# The portions of this file that decode PS-ADPCM data to PCM are derived from vgmstream
-# (https://github.com/losnoco/vgmstream) and are therefore covered by some or all of the
-# following copyright notice:
-#
-# Copyright (c) 2008-2019 Adam Gashlin, Fastelbja, Ronny Elfert, bnnm,
-#                         Christopher Snowhill, NicknineTheEagle, bxaimc,
-#                         Thealexbarney, CyberBotX, et al
-#
-# Portions Copyright (c) 2004-2008, Marko Kreen
-# Portions Copyright 2001-2007  jagarl / Kazunori Ueno <jagarl@creator.club.ne.jp>
-# Portions Copyright (c) 1998, Justin Frankel/Nullsoft Inc.
-# Portions Copyright (C) 2006 Nullsoft, Inc.
-# Portions Copyright (c) 2005-2007 Paul Hsieh
-# Portions Public Domain originating with Sun Microsystems
 
+#  The portions of this file that decode PS-ADPCM data are derived from:
+#  https://github.com/losnoco/vgmstream/blob/ce5bdedd2ab6eba4938f790225ab9684473d3e35/src/coding/psx_decoder.c
 
 import struct
 import wave

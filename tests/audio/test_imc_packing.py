@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
 """test_imcpacking.py - test command line tools imcpack and imcunpack"""
+
 
 import filecmp
 from shlex import split as shlex_split

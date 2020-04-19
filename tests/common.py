@@ -1,6 +1,7 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
 """common.py - common utils and such for the gitarootools test suite"""
+
 import os
 
 try:

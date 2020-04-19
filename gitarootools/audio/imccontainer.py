@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
 """imccontainer.py - read/write IMC audio container files
 
 An IMC audio container file is a file type from Gitaroo Man that has the extension .IMC
 and contains audio subsongs."""
+
 
 import struct
 from itertools import count, zip_longest

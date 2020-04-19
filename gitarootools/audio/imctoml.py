@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
 """imctoml.py - read/write toml representations of IMC audio container files
 
 This module can take an ImcContainer instance from imccontainer.py, extract its
@@ -9,6 +9,7 @@ loading them into an ImcContainer instance.
 
 A toml file is a plaintext file of human-readable values.
 """
+
 import os
 import warnings
 

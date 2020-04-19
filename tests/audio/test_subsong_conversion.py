@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
 """test_subsong_conversion.py - test command line tools subsongconv, subsong2wav,
 subsong2subimc
 """
+
 import filecmp
 from shlex import split as shlex_split
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
 """subsong2subimc.py - command-line tool to convert subsongs to .sub.imc format"""
+
 import sys
 
 from gitarootools.cmdline.subsong2common import run_script

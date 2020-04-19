@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
 """imcunpack.py - command-line tool to unpack IMC audio container files to TOML+.sub.imc
 
 unpacks each .IMC container file to a subdirectory containing .sub.imc subsongs and a
 toml file that can be used to repack them
 """
+
 import argparse
 import os
 import sys

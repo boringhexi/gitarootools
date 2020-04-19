@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#  Copyright (c) 2019, 2020 boringhexi
 """subsongconv.py - command-line tool to convert one subsong to any format/filename"""
+
 import argparse
 import sys
 

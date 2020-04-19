@@ -3,7 +3,7 @@ name = "gitarootools"
 version = "0.1.1"
 description = "command line tools to work with Gitaroo Man game data"
 license = "MIT"
-authors = ["Iris Nakamura <boringhexi@pm.me>"]
+authors = ["boringhexi <boringhexi@pm.me>"]
 readme = "README.md"
 repository = "https://github.com/boringhexi/gitarootools"
 
