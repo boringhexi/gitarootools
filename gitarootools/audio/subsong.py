@@ -376,7 +376,8 @@ class Subsong:
         """initialize a subsong of sample_rate from channels
 
         channels: iterable of channels (e.g. PsAdpcmChannel and/or Pcm16Channel objects)
-        sample_rate: samples per second, can be 22000 to 48000 inclusive
+        sample_rate: samples per second, can be 8000 to 48000 inclusive
+            TODO: only sample rate as as low as 22500 has been tested on a real PS2
         ofpb, obpc: assigns self.original_block_layout = (ofpb, obpc), see that for info
 
         """
@@ -415,13 +416,13 @@ class Subsong:
 
     @property
     def sample_rate(self):
-        """can be between 22000 and 48000 (inclusive)"""
+        """can be between 8000 and 48000 (inclusive)"""
         return self._sample_rate
 
     @sample_rate.setter
     def sample_rate(self, value):
-        if not 22000 <= value <= 48000:
-            raise ValueError("sample_rate must be between 22000 and 48000")
+        if not 8000 <= value <= 48000:
+            raise ValueError("sample_rate must be between 8000 and 48000")
         self._sample_rate = value
 
     @property
@@ -553,7 +554,7 @@ def read_subimc(file, knownsize=None):
         # sanity checks, since the format is so simple
         if not 1 <= num_channels <= 8:
             raise SubsongError(f"invalid number of channels {num_channels}")
-        if not 22000 <= sample_rate <= 48000:
+        if not 8000 <= sample_rate <= 48000:
             raise SubsongError(f"invalid sample rate {sample_rate}")
         if frames_per_block == 0:
             raise SubsongError("frames per block should not be 0")
