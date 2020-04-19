@@ -1,5 +1,8 @@
 # Changelog
 
+upcoming version:
+
+
 0.1.1:
 - (IMC audio tests) use public domain audio 
 - (gm-subsong2subimc/wav, gm-subsongconv) allow sample rates as low as 8000 (note: below 22500
