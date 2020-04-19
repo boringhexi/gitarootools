@@ -33,15 +33,17 @@
     # another file's (see below). If you don't need to modify every channel, Option 2 is
     # recommended because when you recompress a channel, it adds recompression noise and
     # increases the size of the binary diff patch.
-    channels-56 = "00.A_INT.wav"
-    # channels-#: Use this file to override the basefile's # channels.
-    # In this example, channels 5 and 6 of this WAV file will override channels 5 and 6
-    # of the basefile above. (Note: channels are numbered starting from 1, not 0.)
     channels-43-to-56 = "00.A_INT.wav"
-    # channels-#-to-#: An alternative to the above. In this example, channels 4 and 3 of
-    # this file will override channels 5 and 6 of the basefile, in that exact order.
-    # (Advanced usage: Use multiple "channels-#" or "channels-#-to-#" entries to get
-    # channels from more than one input file.)
+    # channels-#-to-#: Use this audio file to override the basefile's channels.
+    # Here channels 4 and 3 of this file will override channels 5 and 6 of the basefile
+    # in that exact order. (Note: channels are numbered starting from 1, not 0.)
+    channels-to-56 = "00.A_INT.wav"
+    # channels-to-#: Shorthand alternative to the above.
+    # The first set of channels will be automatically filled in with channels (1,2,3...)
+    # equal to the number of destination channels. In this example, channels 1 and 2 of
+    # this WAV file will override channels 5 and 6 of the basefile above.
+    # (Advanced usage: You can specify multiple "channels-" entries to get channels from
+    # more than one input file.)
     [diff-patch-info]
     # Everything in this section can be safely left alone. It was automatically filled
     # with data from the original game. If [Repack-Settings].diff-patch-friendly = true,
@@ -66,7 +68,7 @@
 name = "apple1"
 loadmode = "stream"
 basefile = "00.apple1.sub.imc"
-# channels-12 = "replacement-audio.wav"
+# channels-12-to-12 = "replacement-audio.wav"
     [Subsong.diff-patch-info]
     rawname = [97, 112, 112, 108, 101, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     unk = [0, 0]
@@ -77,7 +79,7 @@ basefile = "00.apple1.sub.imc"
 name = "apple2"
 loadmode = "entire"
 basefile = "01.apple2.sub.imc"
-# channels-12 = "replacement-audio.wav"
+# channels-12-to-12 = "replacement-audio.wav"
     [Subsong.diff-patch-info]
     rawname = [97, 112, 112, 108, 101, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     unk = [0, 0]

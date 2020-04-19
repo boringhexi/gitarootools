@@ -88,15 +88,17 @@ _toml_header = """\
     # another file's (see below). If you don't need to modify every channel, Option 2 is
     # recommended because when you recompress a channel, it adds recompression noise and
     # increases the size of the binary diff patch.
-    channels-56 = "00.A_INT.wav"
-    # channels-#: Use this file's # channels to override the basefile's # channels.
-    # In this example, channels 5 and 6 of this WAV file will override channels 5 and 6
-    # of the basefile above. (Note: channels are numbered starting from 1, not 0.)
     channels-43-to-56 = "00.A_INT.wav"
-    # channels-#-to-#: An alternative to the above. In this example, channels 4 and 3 of
-    # this file will override channels 5 and 6 of the basefile, in that exact order.
-    # (Advanced usage: Use multiple "channels-#" or "channels-#-to-#" entries to get
-    # channels from more than one input file.)
+    # channels-#-to-#: Use this audio file to override the basefile's channels.
+    # Here channels 4 and 3 of this file will override channels 5 and 6 of the basefile
+    # in that exact order. (Note: channels are numbered starting from 1, not 0.)
+    channels-to-56 = "00.A_INT.wav"
+    # channels-to-#: Shorthand alternative to the above.
+    # The first set of channels will be automatically filled in with channels (1,2,3...)
+    # equal to the number of destination channels. In this example, channels 1 and 2 of
+    # this WAV file will override channels 5 and 6 of the basefile above.
+    # (Advanced usage: You can specify multiple "channels-" entries to get channels from
+    # more than one input file.)
     [diff-patch-info]
     # Everything in this section can be safely left alone. It was automatically filled
     # with data from the original game. If [Repack-Settings].diff-patch-friendly = true,
@@ -129,7 +131,7 @@ class SubsongChannelReplacer:
         subsong_dest: a subsong.Subsong instance whose channels are to be replaced
         The following are only used create useful error messages:
           dest_filename: name of the file subsong_dest came from (basename only)
-          dest_name: internal name of subsong_dest (from the IMC container's entries)
+          dest_intname: internal name of subsong_dest (from the IMC container's entries)
         """
         self._already_replaced_channels = dict()
         self._subsong_dest = subsong_dest
@@ -137,47 +139,68 @@ class SubsongChannelReplacer:
         self._dest_intname = dest_intname
 
     def _chnums_from_chstring(self, chsrepl_string):
-        """from a str like "channels-56" or "channels-43-to-56", get src/dest channels
+        """from a str like "channels-to-56" or "channels-43-to-56", get src/dest channels
 
-        "channels-56" returns ((5,6), (5,6))
+        "channels-to-56" returns ((1,2), (5,6))
         "channels-43-to-56" returns ((4,3), (5,6))
+        "channels-56" is for backwards compatibility, returns ((5,6), (5,6))
 
-        chsrepl_string: a string like "channels-56" or "channels-43-to-56"
+        chsrepl_string: a string like "channels-to-56" or "channels-43-to-56"
         returns: (chanrepl_src, chanrepl_dest)
           chanrepl_src: a tuple of ints representing source channels
           chanrepl_dest: a tuple of ints representing destination channels
 
         """
-        chnums_raw = chsrepl_string[len("channels-") :]  # e.g. "56" or "12-to-56"
-        if "-to-" in chnums_raw:
-            chnums_src_raw, chnums_dest_raw = chnums_raw.split("-to-", maxsplit=1)
-        else:
-            chnums_src_raw, chnums_dest_raw = chnums_raw, chnums_raw
+        chnums_raw = chsrepl_string[
+            len("channels-") :
+        ]  # e.g. "56" (old way), "to-34",  or "12-to-56"
+        if "to" in chnums_raw:  # chnums_raw = "12-to-56" or "to-34"
+            try:
+                # "channels-12-to-56" -> src=(1,2) dest=(5,6)
+                if "-to-" in chnums_raw:
+                    chnums_src, chnums_dest = (
+                        tuple(int(x) for x in chnums_srcdest_raw)
+                        for chnums_srcdest_raw in chnums_raw.split("-to-", maxsplit=1)
+                    )
+                # "channels-to-34" -> src=(1,2) dest=(3,4)
+                elif chnums_raw.startswith("to-"):
+                    chnums_dest = tuple(int(x) for x in chnums_raw[3:])
+                    chnums_src = tuple(range(1, len(chnums_dest) + 1))
+                else:
+                    raise ValueError()
+            except ValueError:
+                raise ChannelReplacementError(
+                    f"subsong {self._dest_intname}: "
+                    "Channel replacement key name needs to be in a format like "
+                    "'channels-56' or 'channels-12-to-56', "
+                    f"not {chsrepl_string!r}"
+                )
+            # sanity check: same number of src and dest channels
+            if not len(chnums_src) == len(chnums_dest):
+                raise ChannelReplacementError(
+                    f"subsong {self._dest_intname}: "
+                    "Channel replacement key name needs an equal number of digits on "
+                    'either side of "-to-", '
+                    f"not {chsrepl_string!r}"
+                )
 
-        # sanity check 1: src & dest channels are all ints
-        if not (chnums_src_raw.isdigit() and chnums_dest_raw.isdigit()):
-            raise ChannelReplacementError(
-                f"subsong {self._dest_intname}: "
-                "Channel replacement key name needs to be in a format like "
-                "'channels-56' or 'channels-12-to-56', "
-                f"not {chsrepl_string!r}"
-            )
-        # sanity check 2: same number of src and dest channels
-        if not len(chnums_src_raw) == len(chnums_dest_raw):
-            raise ChannelReplacementError(
-                f"subsong {self._dest_intname}: "
-                "Channel replacement key name in a format like "
-                "channels-12-to-56 needs an equal number of digits on "
-                'either side of "-to-", '
-                f"not {chsrepl_string!r}"
-            )
+        else:  # "channels-56", only here for backwards compatibility
+            # "56" -> (5,6) -> src=(5,6) dest=(5,6)
+            try:
+                chnums_dest = tuple(int(x) for x in chnums_raw)
+            except ValueError:
+                raise ChannelReplacementError(
+                    f"subsong {self._dest_intname}: "
+                    "Channel replacement key name needs to be in a format like "
+                    "'channels-12-to-56' or 'channels-to-56', "
+                    f"not {chsrepl_string!r}"
+                )
+            chnums_src = chnums_dest
 
-        chnums_src = tuple(int(x) for x in chnums_src_raw)
-        chnums_dest = tuple(int(x) for x in chnums_dest_raw)
         return chnums_src, chnums_dest
 
     def replace_channels(self, subsong_src, chanrepl_string, subsong_src_filename):
-        """replce destination subsong's channels based on chanrepl_string
+        """replce dest subsong's channels with src's based on chanrepl_string
 
         Channels in subsong_src replace channels in self._subsong_dest, based on
         chanrepl_string.
@@ -347,7 +370,7 @@ def write_toml(imccontainer, imcname, outerdestdir, progressfunc=None):
                     str(x) for x in range(1, csubsong.num_channels + 1)
                 )
                 comment = (
-                    f'channels-{channel_nums} = "'
+                    f'channels-{channel_nums}-to-{channel_nums} = "'
                     f"replacement-audio{SUBSONG_FORMATS['wav']}"
                     '"'
                 )

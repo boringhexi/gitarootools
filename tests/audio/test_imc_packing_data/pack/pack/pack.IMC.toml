@@ -21,10 +21,10 @@ name = "DrumsRight"
 loadmode = "stream"
 basefile = "chorus.wav"
 channels-2-to-1 = "drumsL.wav"
-channels-1-to-2 = "drumsL.wav"
+channels-to-2 = "drumsL.wav"
 
 [[Subsong]]
 name = "DrumsLChorusR"
 loadmode = "stream"
 basefile = "drumsL.wav"
-channels-2 = "chorus.wav"
+channels-2 = "chorus.wav" #old way, checking backwards compatibility
