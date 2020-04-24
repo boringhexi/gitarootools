@@ -56,7 +56,7 @@ def build_argparser():
         default="",
         metavar="SUFFIX",
         dest="suffix",
-        help="Suffix to append to the name of each directory of subsongs and its "
+        help="Suffix to include in the name of each directory of subsongs and its "
         f"{IMCTOML_EXT} filename",
     )
     parser.add_argument(
@@ -72,7 +72,7 @@ def build_argparser():
             f"""\
 Examples:
   Example 1: Unpack a single {IMC_EXT} file
-      {parser.prog} ST00A.IMC
+      {parser.prog} ST00A{IMC_EXT}
 
   Example 2: Unpack multiple {IMC_EXT} files, list files as they are unpacked
       {parser.prog} -v ST00A{IMC_EXT} ST00B{IMC_EXT}
@@ -80,12 +80,16 @@ Examples:
   Example 3: Unpack multiple {IMC_EXT} files with a wildcard
       {parser.prog} *{IMC_EXT}
 
-  Example 4: Give output directories a suffix (e.g. ST00A_US{s})
+  By default, file.IMC will unpack to file_IMC{s}file.IMC.toml. You can
+  >customize the output dir and filenames:
+
+  Example 4: Give output dir and file a suffix (e.g. _US results in 
+  >ST00A_US_IMC{s}ST00A_US.IMC.toml)
       {parser.prog} -s _US ST00A{IMC_EXT} ST00B{IMC_EXT}
 
-  Example 5: Create unpacked dirs in different directory (e.g. create ST00A{s} in
-  >mystuff{s})
-      {parser.prog} -d mystuff{s} ST00A{IMC_EXT}"""
+  Example 5: Create unpacked dirs in different outer directory (e.g. unpack to 
+  >outerdir{s}ST00A_IMC{s})
+      {parser.prog} -d outerdir ST00A{IMC_EXT}"""
         )
     )
     return parser
@@ -108,15 +112,22 @@ def main(args=tuple(sys.argv[1:])):
     inpaths = chain.from_iterable(
         iglob(inpath) for inpath in parsed_args.input_imcfiles
     )
+    suf = parsed_args.suffix
+
     for inpath in inpaths:
-        output_name = os.path.splitext(os.path.basename(inpath))[0]
-        output_name += parsed_args.suffix  # e.g. ST00A_suffix
+        namebase = os.path.splitext(os.path.basename(inpath))[0]  # dir/file.IMC -> file
+        output_dirpath = os.path.join(
+            outer_dir, f"{namebase}{suf}_IMC"  # outer/file_suf_IMC/
+        )
+        output_tomlbase = f"{namebase}{suf}{IMCTOML_EXT}"  # file_suf.IMC.toml
 
         # unpack IMC container file
         if parsed_args.verbose:
-            print(f"unpacking {inpath!r} -> {os.path.join(outer_dir, output_name)!r}")
+            print(f"unpacking {inpath!r} -> {output_dirpath!r}")
         imcc = read_imc(inpath)
-        write_toml(imcc, output_name, outer_dir, progressfunc=verbosefunc)
+        write_toml(
+            imcc, output_dirpath, output_tomlbase, progressfunc=verbosefunc,
+        )
 
 
 if __name__ == "__main__":

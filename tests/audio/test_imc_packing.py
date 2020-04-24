@@ -43,7 +43,7 @@ def test_imcunpack(tmpdir, capsys):
     )
 
     # 4. prepare paths for file & dir comparison
-    actual_output_dir = tmpdir.join("actual_output", "unpack")
+    actual_output_dir = tmpdir.join("actual_output", "unpack_IMC")
     expected_ouput_dir = tmpdir.join("expected_output")
     toml_actual_output_path = actual_output_dir.join("unpack.IMC.toml")
     toml_expected_output_path = expected_ouput_dir.join("unpack.IMC.toml")

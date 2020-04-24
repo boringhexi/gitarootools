@@ -314,12 +314,15 @@ def read_toml(tomlpath):
     return ImcContainer(csubsongs)
 
 
-def write_toml(imccontainer, imcname, outerdestdir, progressfunc=None):
+def write_toml(
+    imccontainer, output_dirpath, output_tomlbase, progressfunc=None,
+):
     """write an ImcContainer to a plaintext toml file and extracted .sub.imc files
 
     imccontainer: ImcContainer instance
-    name: determines the name of the toml dir & toml file, e.g. "ST00A"
-    outerdestdir: directory to which to write the dir containing toml file + subsongs
+    output_dirpath: new directory to create and to unpack IMC contents to
+    output_tomlbase: base filename to which to write the .IMC.toml file (will be put in
+      output_dirpath)
     progressfunc: function to run whenever a subsong is about to be extracted from
       the ImcContainer. It must accept three arguments: an int subsong index,
       an int total number of subsongs, and an imccontainer.ContainerSubsong instance
@@ -333,8 +336,8 @@ def write_toml(imccontainer, imcname, outerdestdir, progressfunc=None):
 
     # prepare toml dir and toml file. writing a bit early here, but if dir/file can't be
     # written, it's better to error before the time-consuming part instead of after
-    tomldir = os.path.join(outerdestdir, imcname)
-    tomlpath = os.path.join(tomldir, f"{imcname}{IMCTOML_EXT}")
+    tomldir = output_dirpath
+    tomlpath = os.path.join(tomldir, output_tomlbase)
     os.makedirs(tomldir, exist_ok=True)
     with open(tomlpath, "wt", encoding="utf-8") as tomlfile:
         try:
