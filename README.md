@@ -20,7 +20,7 @@ gm-<toolname> -h
 ## Included tools
 ### Audio
 
-**`gm-imcpack`**: pack an IMC audio container from subsongs
+**`gm-imcpack`**: pack subsongs into an IMC audio container
 
 **`gm-imcunpack`**: unpack subsongs from an IMC audio container
 

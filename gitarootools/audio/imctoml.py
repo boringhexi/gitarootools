@@ -16,7 +16,7 @@ import warnings
 import tomlkit
 from gitarootools.audio.imccontainer import ContainerSubsong, ImcContainer
 from gitarootools.audio.subsong import read_subsong
-from gitarootools.miscutils.extutils import IMCTOML_EXT, SUBSONG_FORMATS
+from gitarootools.miscutils.extutils import SUBSONG_FORMATS
 
 SUBIMC_EXT = SUBSONG_FORMATS["subimc"]
 
@@ -74,25 +74,25 @@ _toml_header = """\
 
 ["Subsong Help/Guide"]
     # This section doesn't do anything. It's just a guide to help you edit the real
-    # Subsong entries below.
-    name = "A_INT"
-    # name: Used internally in Gitaroo Man. Must be 16 ascii characters or less.
+    # [[Subsong]] entries below.
+    name = "SUBSONG"
+    # name: Used internally by the game. Must be 16 ascii characters or less.
     loadmode = "stream"
     # loadmode: Memory loading mode, either "stream" or "entire".
     # "stream" will load only part at a time as it plays, typically used for music.
     # "entire" will load the whole thing in advance, typically used for sound effects.
-    basefile = "00.A_INT.sub.imc"
+    basefile = "00.SUBSONG.sub.imc"
     # basefile: Audio file containing this subsong's audio.
     # Option 1: You can change this to point to another file (such as a WAV file).
     # Option 2: You can use this file as-is and override only specific channels with
     # another file's (see below). If you don't need to modify every channel, Option 2 is
     # recommended because when you recompress a channel, it adds recompression noise and
     # increases the size of the binary diff patch.
-    channels-43-to-56 = "00.A_INT.wav"
+    channels-43-to-56 = "00.OTHER.wav"
     # channels-#-to-#: Use this audio file to override the basefile's channels.
     # Here channels 4 and 3 of this file will override channels 5 and 6 of the basefile
     # in that exact order. (Note: channels are numbered starting from 1, not 0.)
-    channels-to-56 = "00.A_INT.wav"
+    channels-to-56 = "00.OTHER.wav"
     # channels-to-#: Shorthand alternative to the above.
     # The first set of channels will be automatically filled in with channels (1,2,3...)
     # equal to the number of destination channels. In this example, channels 1 and 2 of

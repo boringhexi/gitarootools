@@ -45,13 +45,17 @@ def glob_all_dirs_to_wildcards(paths, *dir_wildcards):
     return wildcarded_paths
 
 
-def exit_if_no_paths(
+def argparse_exit_if_no_paths(
     seq,
     errorprefix="",
     errormessage="error: No files to process. You may have specified a wildcard "
     "that doesn't match anything",
 ):
-    """if seq is empty, print errorprefix+errormessage and do sys.exit(2)"""
+    """if seq is empty, print errorprefix+errormessage and do sys.exit(2)
+
+    So named because it behaves like argparse's usage errors and is meant to be used
+    alongside it
+    """
     if not seq:
         print(errorprefix + errormessage, file=sys.stderr)
         sys.exit(2)
@@ -94,35 +98,6 @@ def make_check_input_path(
         return filepath
 
     return check_input_path
-
-
-def charunwrap(text, char=">"):
-    """any line starting with char is appended to the previous line
-
-    if a line in text starts with char (or whitespace then char), it is assumed to be a
-    continuation of the previous line and will be appended (with a space) to the
-    previous line.
-    returns: (str) text with those lines unwrapped
-    """
-    unwrapped_lines = []
-    current_lineparts = []
-    end = ""
-    for line, line_end in zip(text.splitlines(), text.splitlines(keepends=True)):
-        prev_end = end
-        end = line_end[len(line) :]
-        line_lstrip = line.lstrip()
-        if line_lstrip.startswith(char):
-            # starts with char, so append to previous
-            current_lineparts.append(line_lstrip[len(char) :])
-        elif current_lineparts:
-            # starting a new line, done adding to the previous one
-            unwrapped_lines.append(" ".join(current_lineparts) + prev_end)
-            current_lineparts = [line]
-        else:
-            # just starting out
-            current_lineparts = [line]
-    unwrapped_lines.append(" ".join(current_lineparts) + end)
-    return "".join(unwrapped_lines)
 
 
 def wrap_argparse_desc(text, width=None):

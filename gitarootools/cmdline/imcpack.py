@@ -14,8 +14,7 @@ import sys
 from gitarootools.audio.imccontainer import write_imc
 from gitarootools.audio.imctoml import read_toml
 from gitarootools.miscutils.cmdutils import (
-    charunwrap,
-    exit_if_no_paths,
+    argparse_exit_if_no_paths,
     glob_all,
     glob_all_dirs_to_wildcards,
     wrap_argparse_desc,
@@ -51,7 +50,7 @@ def build_argparser():
         metavar="OUTDIR",
         default="",  # current working directory
         dest="directory",
-        help="directory to which each .IMC file will be written "
+        help=f"directory to which each {IMC_EXT} file will be written "
         "(uses the current working directory if not specified)",
     )
     parser.add_argument(
@@ -59,30 +58,28 @@ def build_argparser():
         "--verbose",
         dest="verbose",
         action="store_true",
-        help="list files and subsongs as they are packed",
+        help=f"list {IMC_EXT} files and their subsongs as they are packed",
     )
     s = os.path.sep
     parser.epilog = wrap_argparse_desc(
-        charunwrap(  # Using > as a line continuation character
-            f"""\
+        f"""\
 Examples:
   Example 1: Pack a single {IMCTOML_EXT} file
-      {parser.prog} ST00A{IMCTOML_EXT}
+      {parser.prog} file{IMCTOML_EXT}
 
-  Example 2: Pack all {IMCTOML_EXT} files in the chosen directories, list files as they
-  >are packed
-      {parser.prog} -v ST00A{s} ST00B{s}
-
-  Example 3: Pack any {IMCTOML_EXT} files in the current directory
+  Example 2: Pack any {IMCTOML_EXT} files in the current directory
       {parser.prog} {os.curdir}
 
-  Example 4: Use a wildcard to search multiple directories for {IMCTOML_EXT} files and
-  >pack them
+  Example 3: Pack all {IMCTOML_EXT} files in the chosen directories, list files as \
+they are packed
+      {parser.prog} -v file{s} file2{s}
+
+  Example 4: Use a wildcard to search multiple directories for {IMCTOML_EXT} files and \
+pack them
       {parser.prog} STAGE*{s}
 
   Example 5: Write packed {IMC_EXT} files to a different directory
-      {parser.prog} -d mystuff{s} ST00A{IMCTOML_EXT}"""
-        )
+      {parser.prog} -d outdir file{IMCTOML_EXT}"""
     )
     return parser
 
@@ -103,7 +100,7 @@ def main(args=tuple(sys.argv[1:])):
         f"error: No {IMCTOML_EXT} files to process. You may have specified directories "
         "that don't contain any, or a wildcard that doesn't match any"
     )
-    exit_if_no_paths(
+    argparse_exit_if_no_paths(
         all_inpaths_toml, errorprefix=errorprefix, errormessage=errormessage
     )
 

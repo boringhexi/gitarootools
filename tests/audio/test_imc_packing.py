@@ -57,9 +57,12 @@ def test_imcunpack(tmpdir, capsys):
     )
     assert not mismatch
     assert not errors
-    # In the case of toml files, compares just values, not comments and such
+    # In the case of toml files, compare just values, not comments and such
     toml_actual_output = tomlkit.parse(read_text(toml_actual_output_path))
     toml_expected_output = tomlkit.parse(read_text(toml_expected_output_path))
+    # before comparing, remove the guide/help section if it exists
+    toml_actual_output.pop("Subsong Help/Guide", None)
+    toml_expected_output.pop("Subsong Help/Guide", None)
     assert toml_actual_output == toml_expected_output
 
 

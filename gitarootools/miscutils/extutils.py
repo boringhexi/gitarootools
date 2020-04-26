@@ -6,6 +6,15 @@ import os
 
 _d = os.path.extsep
 
+# === Audio: IMC container extensions ===
+IMC_EXT = f"{_d}IMC"
+IMCTOML_EXT = f"{_d}IMC{_d}toml"
+# *.IMC.TOML case insensitive:
+IMCTOML_EXT_GLOB = f"*{_d}[iI][mM][cC]{_d}[tT][oO][mM][lL]"
+
+# === Audio: Subsong formats & extensions ===
+SUBSONG_FORMATS = {"subimc": f"{_d}sub{_d}imc", "wav": f"{_d}wav"}
+
 
 class ExtensionError(ValueError):
     """error raised regarding path/filename extensions"""
@@ -55,11 +64,6 @@ def replaceext(filepath, new_ext, *considered_exts):
     return root + new_ext
 
 
-# === Audio: Subsong extension stuff ===
-
-SUBSONG_FORMATS = {"subimc": f"{_d}sub{_d}imc", "wav": f"{_d}wav"}
-
-
 def subsongtype(filepath):
     """return subsong type based on filepath extension's (case insensitive)
 
@@ -100,11 +104,3 @@ def subsong_replaceext(filepath, subsongformat_type):
     new_ext = SUBSONG_FORMATS[subsongformat_type]
     considered_exts = SUBSONG_FORMATS.values()
     return replaceext(filepath, new_ext, *considered_exts)
-
-
-# === Audio: IMC container extension stuff ===
-
-IMC_EXT = f"{_d}IMC"
-
-IMCTOML_EXT = f"{_d}IMC{_d}toml"
-IMCTOML_EXT_GLOB = f"*{_d}[iI][mM][cC]{_d}[tT][oO][mM][lL]"  # case insensitive

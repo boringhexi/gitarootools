@@ -16,7 +16,6 @@ from itertools import chain
 from gitarootools.audio.imccontainer import read_imc
 from gitarootools.audio.imctoml import write_toml
 from gitarootools.miscutils.cmdutils import (
-    charunwrap,
     make_check_input_path,
     wrap_argparse_desc,
 )
@@ -64,33 +63,31 @@ def build_argparser():
         "--verbose",
         dest="verbose",
         action="store_true",
-        help="list files and subsongs as they are unpacked",
+        help=f"list {IMC_EXT} files and their subsongs as they are unpacked",
     )
     s = os.path.sep
     parser.epilog = wrap_argparse_desc(
-        charunwrap(  # Using > as a line continuation character
-            f"""\
+        f"""\
 Examples:
   Example 1: Unpack a single {IMC_EXT} file
-      {parser.prog} ST00A{IMC_EXT}
+      {parser.prog} file{IMC_EXT}
 
   Example 2: Unpack multiple {IMC_EXT} files, list files as they are unpacked
-      {parser.prog} -v ST00A{IMC_EXT} ST00B{IMC_EXT}
+      {parser.prog} -v file{IMC_EXT} file2{IMC_EXT}
 
   Example 3: Unpack multiple {IMC_EXT} files with a wildcard
       {parser.prog} *{IMC_EXT}
 
-  By default, file.IMC will unpack to file_IMC{s}file.IMC.toml. You can
-  >customize the output dir and filenames:
+  By default, file{IMC_EXT} will unpack to file_IMC{s}file{IMCTOML_EXT}. You can \
+customize the output dir and filenames:
 
-  Example 4: Give output dir and file a suffix (e.g. _US results in 
-  >ST00A_US_IMC{s}ST00A_US.IMC.toml)
-      {parser.prog} -s _US ST00A{IMC_EXT} ST00B{IMC_EXT}
+  Example 4: Give output dir and file a suffix (e.g. _US results in \
+file_US_IMC{s}file_US{IMCTOML_EXT})
+      {parser.prog} -s _US file{IMC_EXT} file2{IMC_EXT}
 
-  Example 5: Create unpacked dirs in different outer directory (e.g. unpack to 
-  >outerdir{s}ST00A_IMC{s})
-      {parser.prog} -d outerdir ST00A{IMC_EXT}"""
-        )
+  Example 5: Create unpacked dirs in different outer directory (e.g. unpack to \
+outerdir{s}file_IMC{s})
+      {parser.prog} -d outerdir file{IMC_EXT}"""
     )
     return parser
 

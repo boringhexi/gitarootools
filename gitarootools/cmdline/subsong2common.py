@@ -8,7 +8,7 @@ import sys
 
 from gitarootools.audio.subsong import read_subsong, write_subsong
 from gitarootools.miscutils.cmdutils import (
-    exit_if_no_paths,
+    argparse_exit_if_no_paths,
     glob_all,
     make_check_input_path,
     wrap_argparse_desc,
@@ -67,16 +67,16 @@ def build_argparser_for_outformat(subsongtype):
         f"""\
 Examples:
   Example 1: Convert a single subsong to {output_extension}
-     {parser.prog} INT{inext}
+     {parser.prog} file{inext}
 
-  Example 2: Convert multiple subsongs, list files as they are converted
-     {parser.prog} -v INT{inext} A1{inext2}
+  Example 2: Convert multiple subsongs to {output_extension}
+     {parser.prog} file{inext} file2{inext2}
 
-  Example 3: Convert multiple subsongs with a wildcard
-     {parser.prog} *{inext}
+  Example 3: Convert multiple subsongs with a wildcard, list files as they are converted
+     {parser.prog} -v *{inext}
 
-  Example 4: Write converted subsongs to another directory
-     {parser.prog} -d mystuff{s} *{inext}
+  Example 4: Output all converted subsongs to outdir{s}
+     {parser.prog} -d outdir *{inext}
 """
     )
     return parser
@@ -95,7 +95,7 @@ def run_script(subsongtype, args):
     # get all input paths, or exit with an error if there aren't any
     all_inpaths = glob_all(parsed_args.input_subsongfiles)
     errorprefix = f"{os.path.basename(sys.argv[0])}: " if sys.argv[0] else ""
-    exit_if_no_paths(all_inpaths, errorprefix=errorprefix)
+    argparse_exit_if_no_paths(all_inpaths, errorprefix=errorprefix)
 
     # create outdir if it doesn't exist (now that we know we have at least 1 input file)
     outdir = parsed_args.directory
