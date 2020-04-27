@@ -15,6 +15,13 @@ IMCTOML_EXT_GLOB = f"*{_d}[iI][mM][cC]{_d}[tT][oO][mM][lL]"
 # === Audio: Subsong formats & extensions ===
 SUBSONG_FORMATS = {"subimc": f"{_d}sub{_d}imc", "wav": f"{_d}wav"}
 
+# === Archive: XGM container extensions ===
+XGM_EXT = f"{_d}XGM"
+XGMTOML_EXT = f"{_d}XGM{_d}toml"
+# *.XGM.TOML case insensitive:
+XGMTOML_EXT_GLOB = f"*{_d}[xX][gG][mM]{_d}[tT][oO][mM][lL]"
+ANIMSEP_EXT = f"{_d}animsep"
+
 
 class ExtensionError(ValueError):
     """error raised regarding path/filename extensions"""

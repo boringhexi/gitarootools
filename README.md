@@ -18,6 +18,12 @@ gm-<toolname> -h
 ```
 
 ## Included tools
+### Archive
+
+**`gm-xgmpack`**: pack files into an XGM container
+
+**`gm-xgmunpack`**: unpack files from an XGM container
+
 ### Audio
 
 **`gm-imcpack`**: pack subsongs into an IMC audio container

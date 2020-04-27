@@ -1,0 +1,18 @@
+[[ImageItem]]
+name16 = "A.IMX"
+
+[[ImageItem]]
+name16 = "B.IMX"
+file-path = "BB.IMX"
+
+[[ModelItem]]
+name16 = "C.XG"
+
+[[ModelItem]]
+name16 = "D.XG"
+file-path = "DD.XG"
+
+[[ModelItem]]
+name16 = "E.XG"
+file-path = "EE.XG"
+animsep-path = "EEE.animsep"

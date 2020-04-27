@@ -21,6 +21,8 @@ gm-imcunpack = "gitarootools.cmdline.imcunpack:main"
 gm-subsongconv = "gitarootools.cmdline.subsongconv:main"
 gm-subsong2subimc = "gitarootools.cmdline.subsong2subimc:main"
 gm-subsong2wav = "gitarootools.cmdline.subsong2wav:main"
+gm-xgmpack = "gitarootools.cmdline.xgmpack:main"
+gm-xgmunpack = "gitarootools.cmdline.xgmunpack:main"
 
 [build-system]
 requires = ["poetry>=1.0.5"]
