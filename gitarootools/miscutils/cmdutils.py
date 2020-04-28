@@ -47,15 +47,23 @@ def glob_all_dirs_to_wildcards(paths, *dir_wildcards):
 
 def argparse_exit_if_no_paths(
     seq,
-    errorprefix="",
+    progname=None,
     errormessage="error: No files to process. You may have specified a wildcard "
-    "that doesn't match anything",
+    "that doesn't match anything.",
 ):
-    """if seq is empty, print errorprefix+errormessage and do sys.exit(2)
+    """if seq is empty, print progname+errormessage to stderr and do sys.exit(2)
 
     So named because it behaves like argparse's usage errors and is meant to be used
-    alongside it
+    alongside it.
+
+    :param seq: sequence. if empty, print the error and exit
+    :param progname: name of this program, can be None/empty string
+    :param errormessage: error message to print
+    :return:
     """
+    if not progname:
+        progname = os.path.basename(sys.argv[0])
+    errorprefix = f"{progname}: " if progname else ""
     if not seq:
         print(errorprefix + errormessage, file=sys.stderr)
         sys.exit(2)

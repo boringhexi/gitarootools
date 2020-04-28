@@ -4,7 +4,6 @@
 
 import argparse
 import os
-import sys
 
 from gitarootools.audio.subsong import read_subsong, write_subsong
 from gitarootools.miscutils.cmdutils import (
@@ -94,8 +93,7 @@ def run_script(subsongtype, args):
 
     # get all input paths, or exit with an error if there aren't any
     all_inpaths = glob_all(parsed_args.input_subsongfiles)
-    errorprefix = f"{os.path.basename(sys.argv[0])}: " if sys.argv[0] else ""
-    argparse_exit_if_no_paths(all_inpaths, errorprefix=errorprefix)
+    argparse_exit_if_no_paths(all_inpaths, progname=parser.prog)
 
     # create outdir if it doesn't exist (now that we know we have at least 1 input file)
     outdir = parsed_args.directory

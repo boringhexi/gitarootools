@@ -94,13 +94,12 @@ def main(args=tuple(sys.argv[1:])):
     all_inpaths_toml = glob_all_dirs_to_wildcards(all_inpaths, XGMTOML_EXT_GLOB)
 
     # or exit with an error if there aren't any matching paths
-    errorprefix = f"{parser.prog}: " if parser.prog else ""
     errormessage = (
         f"error: No {XGMTOML_EXT} files to process. You may have specified directories "
-        "that don't contain any, or a wildcard that doesn't match any"
+        "that don't contain any, or a wildcard that doesn't match any."
     )
     argparse_exit_if_no_paths(
-        all_inpaths_toml, errorprefix=errorprefix, errormessage=errormessage
+        all_inpaths_toml, progname=parser.prog, errormessage=errormessage
     )
 
     # create outdir if it doesn't exist (now that we know we have at least 1 input file)
