@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #  Copyright (c) 2019, 2020 boringhexi
-"""subsong2common.py - common stuff used by the subsong2foo scripts"""
+"""subsong2common.py - common stuff used by the subsong2xxx scripts"""
 
 import argparse
 import os
@@ -18,8 +18,10 @@ from gitarootools.miscutils.extutils import SUBSONG_FORMATS, subsong_replaceext
 def build_argparser_for_outformat(subsongtype):
     """build a command line parser for a gm-subsong2foo script
 
-    subsongtype: one subsong_ext.SUPPORTED_FORMATS.keys(). This will change the help
-      text and which input file formats are allowed
+    subsongtype: a key from extutils.SUBSONG_FORMATS, e.g. "wav" This determines:
+      - output file extension (same as subsongtype)
+      - allowed input file extensions (all SUBSONG_FORMATS except subsongtype)
+      - the help text (mentions of input and output file extensions)
     """
     # determine which input and output formats to support
     # (e.g. no point in converting a subsong to its own type)
@@ -82,10 +84,10 @@ Examples:
 
 
 def run_script(subsongtype, args):
-    """run a subsong2foo script
+    """run a subsong2xxx script with args (e.g. "wav" runs subsong2wav)
 
-    subsongtype: one subsong_ext.SUPPORTED_FORMATS.keys(). This will affect the argument
-      parser and the extension of output files
+    subsongtype: a key from extutils.SUBSONG_FORMATS, e.g. "wav". Passing "wav" will run
+      subsong2wav, and so on.
     args: sequence of command line argument strings, such as from sys.argv[1:]
     """
     parser = build_argparser_for_outformat(subsongtype)
