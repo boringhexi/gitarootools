@@ -15,10 +15,7 @@ from itertools import chain
 
 from gitarootools.audio.imccontainer import read_imc
 from gitarootools.audio.imctoml import write_toml
-from gitarootools.miscutils.cmdutils import (
-    make_check_input_path,
-    wrap_argparse_desc,
-)
+from gitarootools.miscutils.cmdutils import make_check_input_path, wrap_argparse_desc
 from gitarootools.miscutils.extutils import IMC_EXT, IMCTOML_EXT, SUBSONG_FORMATS
 
 
