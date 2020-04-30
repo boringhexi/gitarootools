@@ -49,7 +49,7 @@ def read_xgm(file: Union[AnyStr, BinaryIO]) -> XgmContainer:
     :return: XgmContainer instance
     """
     with open_maybe(file, "rb") as file:
-        num_imageitems, num_modelitems = readstruct("<II", file)
+        num_imageitems, num_modelitems = readstruct(file, "<II")
         imageitems = [read_imageitem(file) for _ in range(num_imageitems)]
         modelitems = [read_modelitem(file) for _ in range(num_modelitems)]
     return XgmContainer(imageitems, modelitems)

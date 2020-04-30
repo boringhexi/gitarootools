@@ -184,11 +184,11 @@ def read_imc(file):
         start_offset = file.tell()
 
         # read number of subsongs
-        num_subsongs = readstruct("<I", file)
+        num_subsongs = readstruct(file, "<I")
 
         # read raw ssinfo
         fmt, items_per_ssinfo_entry = ("<" + "16s4I" * num_subsongs), 5
-        raw_ssinfos = tuple(chunks(readstruct(fmt, file), items_per_ssinfo_entry))
+        raw_ssinfos = tuple(chunks(readstruct(file, fmt), items_per_ssinfo_entry))
         next_ssoffsets = (x[1] for x in raw_ssinfos[1:])
 
         # read subsongs, convert to ContainerSubsongs

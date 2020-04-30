@@ -88,13 +88,13 @@ def to_nibbles(*nibblevals):
     )
 
 
-def readstruct(fmt, file):
+def readstruct(file, fmt):
     """read and return values from file according to struct fmt
 
-    fmt: string struct format (see documentation for builtin struct module)
     file: file object with read(size) method
     returns: If it's just one value, it's return directly (not in a tuple).
         Multiple values are still returned as a tuple.
+    fmt: string struct format (see documentation for builtin struct module)
     raises: EOFError if end of file is encountered before all bytes are read
     """
     size = struct.calcsize(fmt)
