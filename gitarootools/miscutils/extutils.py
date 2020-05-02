@@ -22,6 +22,13 @@ XGMTOML_EXT = f"{_d}XGM{_d}toml"
 XGMTOML_EXT_GLOB = f"*{_d}[xX][gG][mM]{_d}[tT][oO][mM][lL]"
 ANIMSEP_EXT = f"{_d}animsep"
 
+# === Image: IMX image extension ===
+IMX_EXT = f"{_d}IMX"
+
+# == Image: PNG image extension and pixel format pseudo-extensions ===
+PNG_EXT = f"{_d}png"
+PIXFMT_EXAMPLE = "rgb24"
+
 
 class ExtensionError(ValueError):
     """error raised regarding path/filename extensions"""

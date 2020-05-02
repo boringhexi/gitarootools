@@ -3,6 +3,9 @@
 """common.py - common utils and such for the gitarootools test suite"""
 
 import os
+from typing import Optional
+
+from PIL import Image
 
 try:
     # noinspection PyProtectedMember
@@ -24,21 +27,39 @@ class ResourceCopier:
         self.destdir = destdir
         self.srcpkg = srcpkg
 
-    def make_subdir(self, subdir=None, create=True):
-        """create subdir of self.destdir and return its path
+    def make_subdir(self, subdirname: Optional[str] = None, create: bool = True) -> str:
+        """create subdirname in self.destdir and return its path
 
-        if subdir is None, just return self.destdir
-        create: if False, don't actual create the subdir after all
-        raise ValueError if subdir is an absolute path
+        Creates path <self.destdir>/<subdirname> and returns it as a string.
+        if subdir is None, just return self.destdir. Will refuse to create a directory
+        outside of self.destdir.
+
+        :param subdirname: name of subdirectory to create inside self.destdir
+        :param create: if False, just return path of subdir without creating it
+        :raise: ValueError if <self.destdir>/<subdirname> is actually outside
+            self.destdir because funky values were passed for subdirname.
+            (e.g. subdirname is something like "../../mwahaha" or "C:\\system32")
+        :return: string of the path <self.destdir>/<subdirname>. if subdir is None,
+            just return self.destdir
         """
-        real_destdir = self.destdir
-        if subdir is not None:
-            if os.path.isabs(subdir):
-                raise ValueError(f"subdir can't be an absolute path, was {subdir!r}")
-            real_destdir = os.path.join(real_destdir, subdir)
+        if subdirname is not None:
+            abs_parentdir = os.path.abspath(self.destdir)
+            real_destdir = os.path.join(self.destdir, subdirname)
+            abs_destdir = os.path.abspath(real_destdir)
+
+            # for safety reasons, make sure the created subdir will actually be inside
+            # self.destdir
+            if abs_parentdir != os.path.commonpath((abs_parentdir, abs_destdir)):
+                raise ValueError(
+                    f"{subdirname!r} is not a subdir relative to {self.destdir!r} "
+                    f"(i.e. {abs_destdir!r} is not a subdir of {abs_parentdir!r})"
+                )
+
             if create:
                 os.makedirs(real_destdir, exist_ok=True)
-        return real_destdir
+            return real_destdir
+        else:
+            return self.destdir
 
     def copy_resource_to_destdir(self, resource, srcpkg=None, subdir=None):
         """copy resource from srcpkg to self.destdir/subdir
@@ -140,3 +161,13 @@ def read_text(filepath, encoding="utf-8"):
     """return text read from filepath"""
     with open(filepath, "rt", encoding=encoding) as file:
         return file.read()
+
+
+def images_identical(path1, path2):
+    """return True if images have identical RGBA pixel values
+
+    This even includes fully transparent pixels with invisible RGB values
+    """
+    image1 = Image.open(path1).convert(mode="RGBA")
+    image2 = Image.open(path2).convert(mode="RGBA")
+    return tuple(image1.getdata()) == tuple(image2.getdata())

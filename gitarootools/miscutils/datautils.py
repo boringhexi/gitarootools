@@ -5,6 +5,7 @@
 import contextlib
 import struct
 from math import ceil
+from typing import Any, AnyStr, BinaryIO, Iterable
 
 if hasattr(contextlib, "nullcontext"):
     nullcontext = contextlib.nullcontext
@@ -127,6 +128,17 @@ def readdata(file, size):
     return data
 
 
+def writestruct(file: BinaryIO, fmt: AnyStr, *values: Any) -> None:
+    """write values to file according to struct fmt
+
+    :param file: file object with read(bytes) method
+    :param fmt: string struct format (see documentation for builtin struct module)
+    :param values: values to write to file, must match fmt
+    :return:
+    """
+    file.write(struct.pack(fmt, *values))
+
+
 def open_maybe(file, mode="r", **kwargs):
     """a drop-in replacement for open() that can also take an already-opened file
 
@@ -171,3 +183,22 @@ def interleave_uneven(iter1, iter2):
         else:
             yield from list1
             return
+
+
+def zip_to_1st(iter1: Iterable, iter2: Iterable, fillvalue: Any = None) -> Iterable:
+    """like zip_longest(iter1, iter2), but limit/extend to the length of iter1
+
+    if iter1 is longer, extend output to its length, using fillvalue to pad iter2.
+    If iter1 is shorter, truncate output to its length.
+    """
+    iter1, iter2 = iter(iter1), iter(iter2)
+    while True:
+        try:
+            yield1 = next(iter1)
+        except StopIteration:
+            break
+        try:
+            yield2 = next(iter2)
+        except StopIteration:
+            yield2 = fillvalue
+        yield yield1, yield2

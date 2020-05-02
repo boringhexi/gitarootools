@@ -1,6 +1,7 @@
 # Changelog
 
 upcoming version:
+- (gm-imx2png/png2imx) add tools gm-imx2png/png2imx
 
 
 0.1.2:

@@ -34,6 +34,12 @@ gm-<toolname> -h
 
 **`gm-subsong2[subimc|wav]`**: convert multiple subsongs to the specified format
 
+### Image
+
+**`gm-imx2png`**: convert IMX images to PNG
+
+**`gm-png2imx`**: convert PNG images to IMX
+
 ## Resources
 * [Gitaroo Pals](https://discord.gg/ed6P8Jt) Discord server for help and support
 * [Issue Tracker](https://github.com/boringhexi/gitarootools/issues)
