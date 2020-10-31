@@ -1,6 +1,7 @@
 # Changelog
 
-upcoming version:
+0.1.4:
+- now works with Python 3.9
 
 
 0.1.3:
