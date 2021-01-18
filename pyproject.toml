@@ -10,11 +10,11 @@ repository = "https://github.com/boringhexi/gitarootools"
 [tool.poetry.dependencies]
 python = "^3.6"
 tomlkit = "^0.7.0"
-importlib_resources = { version = "^3.3.0", python = "~3.6" }
-pillow = "^8.0.1"
+importlib_resources = { version = "^5.0.0", python = "~3.6" }
+pillow = "^8.1.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.1.2"
+pytest = "^6.2.1"
 
 [tool.poetry.scripts]
 gm-imcpack = "gitarootools.cmdline.imcpack:main"
