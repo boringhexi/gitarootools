@@ -105,3 +105,7 @@ def main(args=tuple(sys.argv[1:])):
             imximage = read_imx(imxfile)
 
         write_to_png(imximage, outpath)
+
+
+if __name__ == "__main__":
+    main()

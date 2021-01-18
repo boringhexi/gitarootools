@@ -145,3 +145,7 @@ def main(args=tuple(sys.argv[1:])):
             print(f"converting {inpath!r} -> {outpath!r}")
         imximage = read_from_png(inpath, pixfmt=pixfmt)
         write_imx(imximage, outpath)
+
+
+if __name__ == "__main__":
+    main()
