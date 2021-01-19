@@ -5,6 +5,7 @@
 An IMX image file is a file type from Gitaroo Man that has the extension .IMX
 and contains RGB(A) or indexed image data."""
 import os
+import pathlib
 from itertools import chain
 from os import SEEK_CUR
 from typing import AnyStr, BinaryIO, Optional, Sequence, Tuple, Union
@@ -25,6 +26,7 @@ from gitarootools.miscutils.datautils import (
 SeqIndexed = Sequence[int]
 SeqRGB = Sequence[Tuple[int, int, int]]
 SeqRGBA = Sequence[Tuple[int, int, int, int]]
+BinaryFp = Union[BinaryIO, AnyStr, pathlib.Path]  # binary file or path
 
 PIXEL_FORMATS = ("rgba32", "rgb24", "i8", "i4")
 
@@ -192,10 +194,10 @@ class ImxImage:
             return pixels
 
 
-def read_imx(file) -> ImxImage:
+def read_imx(fp: BinaryFp) -> ImxImage:
     """read from an IMX image file and return an ImxImage
 
-    :param file: A file path. Or it can be an already-opened file, in which case:
+    :param fp: A file path. Or it can be an already-opened file, in which case:
         - it will read starting from the current file position
         - after returning, file position will be right after the IMX file data
         - the caller is responsible for closing the file afterwards
@@ -203,7 +205,7 @@ def read_imx(file) -> ImxImage:
     :raises EndOfImxImageError if end of IMX data is reached unexpectedly
     :return: ImxImage instance
     """
-    with open_maybe(file, "rb") as file:
+    with open_maybe(fp, "rb") as file:
         try:
             magic = readdata(file, 4)
             if magic != b"IMX\0":
@@ -250,16 +252,16 @@ def read_imx(file) -> ImxImage:
     return ImxImage(width, height, pixels, palette, pixfmt=pixfmt, alpha128=True)
 
 
-def write_imx(imximage: ImxImage, file: Union[BinaryIO, AnyStr]) -> None:
+def write_imx(imximage: ImxImage, fp: BinaryFp) -> None:
     """write imximage to file
 
     :param imximage: an ImxImage instance
-    :param file: A file path. Or it can be an already-opened file, in which case:
+    :param fp: A file path. Or it can be an already-opened file, in which case:
         - it will write starting from the current file position
         - after returning, file position will be right after the written IMX data
         - the caller is responsible for closing the file afterwards
     """
-    with open_maybe(file, "wb") as file:
+    with open_maybe(fp, "wb") as file:
         # header
         file.write(b"IMX\0")
         pixfmtdata = _pixfmt_pixfmtdata[imximage.pixfmt]
@@ -289,19 +291,17 @@ def write_imx(imximage: ImxImage, file: Union[BinaryIO, AnyStr]) -> None:
         writestruct(file, "<2I", 3, 0)
 
 
-def read_from_png(
-    file: Union[BinaryIO, AnyStr], pixfmt: Optional[str] = None
-) -> ImxImage:
+def read_from_png(fp: BinaryFp, pixfmt: Optional[str] = None) -> ImxImage:
     """read from an PNG file and return an ImxImage
 
-    :param file: A file object or file path to read from. Only PNG images are guaranteed
+    :param fp: A file object or file path to read from. Only PNG images are guaranteed
         to work, but potentially any image format supported by PIL may also work.
     :param pixfmt: pixel format, one of str (rgba32, rgb24, i8, i4), or None for auto
     :raises ValueError if pixfmt isn't valid
     :raises ValueError if file has a pixel mode unsupported by PIL
     :return: ImxImage instance
     """
-    with Image.open(file) as image:
+    with Image.open(fp) as image:
 
         if pixfmt not in PIXEL_FORMATS and pixfmt is not None:
             raise ValueError(
@@ -352,13 +352,18 @@ def read_from_png(
             palette = None
         elif pixfmt in ("i8", "i4"):
             maxcolors = 256 if pixfmt == "i8" else 16
-            imagename = getimagename(file)
+            imagename = getimagename(fp)
             pixels, palette = image2indexed(image, maxcolors, imagename)
 
     return ImxImage(width, height, pixels, palette, pixfmt, alpha128=False)
 
 
-def getimagename(file_or_path: Union[BinaryIO, AnyStr]) -> str:
+def getimagename(file_or_path: BinaryFp) -> str:
+    """return the base filename from file_or_path
+
+    :param file_or_path: an open file object, string file path, or pathlib Path
+    :return: basename (i.e just filename) of the path (or of the file's path)
+    """
     if hasattr(file_or_path, "name"):
         name = str(file_or_path.name)
     else:
@@ -410,11 +415,11 @@ def image2indexed(
     return pixels, palette
 
 
-def write_to_png(imximage: ImxImage, file: Union[BinaryIO, AnyStr]) -> None:
+def write_to_png(imximage: ImxImage, fp: BinaryFp) -> None:
     """write an ImxImage to PNG image file
 
     :param imximage: an ImxImage instance
-    :param file: A file path or an already-opened file
+    :param fp: A file path or an already-opened file
     """
     if imximage.haspalette:
         image = Image.new("P", imximage.size)
@@ -426,7 +431,7 @@ def write_to_png(imximage: ImxImage, file: Union[BinaryIO, AnyStr]) -> None:
         image = Image.new("RGB", imximage.size)
     image.putdata(imximage.export_pixels())
 
-    image.save(file, format="png")
+    image.save(fp, format="png")
 
 
 def fast_imx_pixfmt(file_or_data: Union[AnyStr, BinaryIO, bytes]) -> str:
