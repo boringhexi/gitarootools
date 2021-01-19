@@ -4,9 +4,11 @@
 
 An IMX image file is a file type from Gitaroo Man that has the extension .IMX
 and contains RGB(A) or indexed image data."""
-from itertools import chain, repeat
+import os
+from itertools import chain
 from os import SEEK_CUR
 from typing import AnyStr, BinaryIO, Optional, Sequence, Tuple, Union
+from warnings import warn
 
 from PIL import Image
 
@@ -18,7 +20,6 @@ from gitarootools.miscutils.datautils import (
     readstruct,
     to_nibbles,
     writestruct,
-    zip_to_1st,
 )
 
 SeqIndexed = Sequence[int]
@@ -44,6 +45,12 @@ class ImxImageError(Exception):
 
 class EndOfImxImageError(ImxImageError, EOFError):
     """raised when the end of an IMX image is reached unexpectedly"""
+
+    pass
+
+
+class ExcessiveColorReductionWarning(UserWarning):
+    """warning issued when Pillow color reduction goes too far"""
 
     pass
 
@@ -300,122 +307,107 @@ def read_from_png(
             raise ValueError(
                 f"pixfmt must be one of {PIXEL_FORMATS} or None, was {pixfmt!r}"
             )
-        if image.mode not in ("RGB", "RGBA", "P"):
-            raise ValueError(f"Image mode {image.mode!r} is not supported yet")
 
         width, height = image.size
 
-        # Choose a pixel format automatically
+        # Choose a pixel format automatically if none is provided
         if pixfmt is None:
-            # potentially convert RGBA to RGB, if lossless
-            if image.mode == "RGBA":
-                image_rgb = image.convert("RGB")
-                is_rgb = tuple(image_rgb.convert("RGBA").getdata()) == tuple(
-                    image.getdata()
-                )
-                if is_rgb:
-                    image = image_rgb
 
-            # potentially convert RGB/RGBA to indexed, if lossless
-            num_colors = len(set(image.getdata()))
-            if image.mode in ("RGBA", "RGB"):
-                if num_colors <= 256:
-                    image = image.quantize(colors=num_colors)
+            num_colors = image.getcolors()
 
-            # determine pixel format
-            if image.mode == "RGBA":
-                pixfmt = "rgba32"
-            elif image.mode == "RGB":
-                pixfmt = "rgb24"
-            elif image.mode == "P" and (num_colors <= 16 and width % 2 == 0):
+            # If few enough colors for i4, do that (but only if width is even)
+            if num_colors is not None and (num_colors <= 16) and (width % 2 == 0):
                 pixfmt = "i4"
-            elif image.mode == "P" and num_colors <= 256:
+
+            # If few enough colors for i8, do that
+            elif image.mode in ("P", "L", "1") or (
+                num_colors is not None and (num_colors <= 256)
+            ):
                 pixfmt = "i8"
+
+            # If no alpha, do RGB. All other cases, do RGBA
             else:
-                raise ValueError(
-                    "Could not automatically choose pixel format, "
-                    f"image.mode={image.mode!r}, num_colors={num_colors!r}"
-                )
+                if image.mode not in ("RGBA", "LA", "PA", "RGBa", "La"):
+                    # if image is in a mode that doesn't have alpha
+                    pixfmt = "rgb24"
+                else:
+                    if image.mode != "RGBA":
+                        image = image.convert("RGBA")
+                    no_alpha = all(a == 255 for a in image.getdata(band=3))
+                    if no_alpha:
+                        pixfmt = "rgb24"
+                    else:
+                        pixfmt = "rgba32"
 
         # get pixels and palette, depending on the desired pixel format
         if pixfmt == "rgba32":
-            image = image.convert("RGBA")
-            pixels = tuple(image.getdata())
+            if image.mode != "RGBA":
+                image = image.convert("RGBA")
+            pixels = image.getdata()
             palette = None
         elif pixfmt == "rgb24":
-            image = image.convert("RGB")
-            pixels = tuple(image.getdata())
+            if image.mode != "RGB":
+                image = image.convert("RGB")
+            pixels = image.getdata()
             palette = None
         elif pixfmt in ("i8", "i4"):
-
-            # Quantize RGB/RGBA image to the right number of colors.
-            # (Do not quantize a "P" (palette) image, convert to "RGBA" first!)
-            if image.mode != "P":
-                image = image.quantize(
-                    colors=(256 if pixfmt == "i8" else 16), dither="FLOYDSTEINBERG"
-                )
-            # If palette image destined for i4 has more than 16 colors, quantize to 16
-            elif pixfmt == "i4" and len(set(image.getdata())) > 16:
-                image = image.convert("RGBA").quantize(
-                    colors=16, dither="FLOYDSTEINBERG"
-                )
-
-            pixels = tuple(image.getdata())
-
-            # Get palette:
-            # 1. get palette alpha from the transparency info. One of 3 possible types:
-            # - iterable of int alpha values corresponding to the palette's rgb values.
-            #   if it's shorter than the palette, rest of the palette is opaque
-            # - single int, the index of the fully transparent palette color
-            # - not present, in which case the entire palette is opaque
-            transparency_info = image.info.get("transparency")
-            if transparency_info is None:
-                # opaque, will be filled in with all 255
-                im_palette_alpha = ()
-            elif not hasattr(transparency_info, "__iter__"):
-                # only one transparent, all the rest is opaque 255
-                transp_idx = transparency_info
-                im_palette_alpha = chain(repeat(255, transp_idx), (0,))
-            else:
-                im_palette_alpha = transparency_info
-            # 2. zip together palette rgb and alpha. If palette alpha is too short, fill
-            # the rest in with 255
-            im_palette_rgb = chunks(image.getpalette(), 3)
-            palette = tuple(
-                (r, g, b, a)
-                for (r, g, b), a in zip_to_1st(
-                    im_palette_rgb, im_palette_alpha, fillvalue=255
-                )
-            )
-
-            # Now we have pixels and palette. If the image is destined for i4, it
-            # already has just 16 colors. But it's likely the palette contains too many
-            # unused entries, so consolidate palette and redo pixels to match.
-            if pixfmt == "i4" and len(palette) > 16:
-                old_palette = palette
-                old_pixels = pixels
-
-                # 1. create new palette containing only used colors,
-                # and keep track of how to get from an old palette index to a new one
-                used_paletteidxs = set(pixels)
-                new_palette = []
-                map_old_new_paletteidxs = dict()
-                newidx = 0
-                for oldidx, oldcol in enumerate(old_palette):
-                    if oldidx in used_paletteidxs:
-                        new_palette.append(oldcol)
-                        map_old_new_paletteidxs[oldidx] = newidx
-                        newidx += 1
-                # 2. redo pixels -- replicate the old pixels using the new palette
-                new_pixels = [map_old_new_paletteidxs[old] for old in old_pixels]
-                # 3. pad palette to 16 colors
-                new_palette = tuple(
-                    chain(new_palette, ((0, 0, 0, 0),) * (16 - len(new_palette)))
-                )
-
-                pixels, palette, = new_pixels, new_palette
+            maxcolors = 256 if pixfmt == "i8" else 16
+            imagename = getimagename(file)
+            pixels, palette = image2indexed(image, maxcolors, imagename)
 
     return ImxImage(width, height, pixels, palette, pixfmt, alpha128=False)
+
+
+def getimagename(file_or_path: Union[BinaryIO, AnyStr]) -> str:
+    if hasattr(file_or_path, "name"):
+        name = str(file_or_path.name)
+    else:
+        name = str(file_or_path)
+    return os.path.basename(name)
+
+
+def image2indexed(
+    image: Image, maxcolors: int = 256, imagename: Optional[str] = None
+) -> Tuple[SeqIndexed, SeqRGBA]:
+    """return (pixels, palette) of image reduced to maxcolors
+
+    Special handling needed here because Pillow's Image.quantize() may reduce colors
+    excessively, resulting in poor image quality
+    (https://github.com/python-pillow/Pillow/issues/5204)
+
+    :param image: Pillow Image instance
+    :param maxcolors: maximum number of colors allowed in the returned palette
+    :param imagename: optional name of image, for printing warnings of excessive color
+        reduction. If None, do not print any warnings.
+    :return: (pixels, palette) where pixels are indices into palette, palette is RGBA
+        colors
+    """
+    if image.mode != "RGBA":
+        image = image.convert("RGBA")
+    imgcolors = image.getcolors(maxcolors=maxcolors)
+
+    # if colors exceed maxcolors, use Pillow's built-in quantization to reduce colors.
+    if imgcolors is None:  # i.e. if getcolors() exceeded maxcolors
+        image = image.quantize(colors=maxcolors, dither="FLOYDSTEINBERG")
+
+        # warn if there was excessive color reduction (due to a possible Pillow bug)
+        num_destcolors = len(image.getcolors(maxcolors=maxcolors))
+        if imagename is not None and (num_destcolors < maxcolors):
+            warn(
+                f"{imagename} was reduced to {num_destcolors} colors instead of "
+                f"{maxcolors} (due to a possible Pillow bug). To avoid this, manually "
+                f"reduce your image to {maxcolors} or fewer colors before converting.",
+                category=ExcessiveColorReductionWarning,
+            )
+        image = image.convert("RGBA")
+        imgcolors = image.getcolors(maxcolors=maxcolors)
+
+    # now that colors are reduced sufficiently, do manual pixel/palette extraction
+    # TODO: now would be the time to rearrange palette to match an existing IMX palette
+    palette = [color for count, color in imgcolors]
+    color2pixel = {color: idx for idx, color in enumerate(palette)}
+    pixels = [color2pixel[color] for color in image.getdata()]
+    return pixels, palette
 
 
 def write_to_png(imximage: ImxImage, file: Union[BinaryIO, AnyStr]) -> None:
