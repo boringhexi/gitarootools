@@ -7,6 +7,8 @@ from typing import Optional
 
 from PIL import Image
 
+from gitarootools.image.imximage import read_imx
+
 try:
     # noinspection PyProtectedMember
     from importlib import resources as importlib_resources
@@ -164,10 +166,33 @@ def read_text(filepath, encoding="utf-8"):
 
 
 def images_identical(path1, path2):
-    """return True if images have identical RGBA pixel values
+    """return True if both images have identical RGBA pixel values
 
     This even includes fully transparent pixels with invisible RGB values
+    path1 and path2 must be openable by Pillow
     """
     image1 = Image.open(path1).convert(mode="RGBA")
     image2 = Image.open(path2).convert(mode="RGBA")
     return tuple(image1.getdata()) == tuple(image2.getdata())
+
+
+def imx_images_identical(path1, path2):
+    """return True if both IMX images have identical RGBA pixel values
+
+    This even includes fully transparent pixels with invisible RGB values.
+    (Palette order doesn't matter, nor do unused palette colors.)
+    """
+    imximage1 = read_imx(path1)
+    imximage2 = read_imx(path2)
+    assert imximage1.pixfmt == imximage2.pixfmt
+    assert imximage1.size == imximage2.size
+    if imximage1.haspalette:
+        pal1, pal2 = imximage1.palette, imximage2.palette
+        imx_pixels_rgba1 = (pal1[i] for i in imximage1.pixels)
+        imx_pixels_rgba2 = (pal2[i] for i in imximage2.pixels)
+        assert all(
+            rgba1 == rgba2 for rgba1, rgba2 in zip(imx_pixels_rgba1, imx_pixels_rgba2)
+        )
+    else:
+        assert imximage1.pixels == imximage2.pixels
+    return True

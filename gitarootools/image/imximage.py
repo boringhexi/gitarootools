@@ -103,27 +103,19 @@ class ImxImage:
                 else:
                     pixfmt = "rgb24"
         self.pixfmt = pixfmt
+        self._alpha128 = alpha128
+        self._palette = palette
+        self._pixels = pixels
 
-        if alpha128:  # use alpha as-is
-            self._pixels = pixels
-            self._palette = palette
+    @property
+    def alpha128(self) -> bool:
+        """True if image uses 128-based alpha"""
+        return self._alpha128
 
-        else:  # convert alpha255 to alpha128
-            if palette is not None:  # convert palette alpha
-                # alpha128 = ceil(alpha255/255*128)
-                self._palette = [
-                    (r, g, b, int(a / 255 * 128 + 0.5)) for (r, g, b, a) in palette
-                ]
-                self._pixels = pixels
-            elif pixels and len(pixels[0]) == 4:  # convert RGBA alpha
-                self._palette = palette
-                # alpha128 = ceil(alpha255/255*128)
-                self._pixels = [
-                    (r, g, b, int(a / 255 * 128 + 0.5)) for (r, g, b, a) in pixels
-                ]
-            else:  # RGB has no alpha
-                self._palette = palette
-                self._pixels = pixels
+    @property
+    def alpha255(self) -> bool:
+        """True if image uses 255-based alpha"""
+        return not self.alpha128
 
     @property
     def size(self) -> Tuple[int, int]:
@@ -141,57 +133,74 @@ class ImxImage:
         return self.haspalette or (self._pixels and len(self._pixels[0]) == 4)
 
     @property
-    def palette(self) -> SeqRGBA:
-        """palette, alpha values are 128-based"""
+    def palette(self) -> Optional[SeqRGBA]:
+        """palette, alpha values are based whether self.alpha128 is True or not"""
         return self._palette
 
     @property
+    def palette128(self) -> Optional[SeqRGBA]:
+        """palette with 128-based alpha"""
+        if self.palette is None:
+            return None
+        if self.alpha128:
+            return self.palette
+        elif self.alpha255:
+            # get alpha128 = ceil(alpha255/255*128)
+            return [
+                (r, g, b, int(a255 / 255 * 128 + 0.5))
+                for (r, g, b, a255) in self.palette
+            ]
+
+    @property
+    def palette255(self) -> Optional[SeqRGBA]:
+        """palette with 255-based alpha"""
+        if self.palette is None:
+            return None
+        if self.alpha255:
+            return self.palette
+        elif self.alpha128:
+            # get alpha255 = floor(alpha128/128*255)
+            return [
+                (r, g, b, int(a128 / 128 * 255)) for (r, g, b, a128) in self.palette
+            ]
+
+    @property
     def pixels(self) -> Union[SeqRGB, SeqRGBA, SeqIndexed]:
-        """pixels, alpha values are 128-based"""
+        """pixels, alpha are based on whether self.alpha128 is true or not"""
         return self._pixels
 
-    def export_palette_rgb_flat(self) -> Optional[SeqRGB]:
-        """return palette RGB as a flat list, for use in exporting to an image format
-
-        Only returns RGB components, concatenated as a flat list. For alpha, use
-        ImxImage.export_palette_alpha_bytes()
-
-        :return None if no palette, or sequence of (r,g,b) colors
-        """
-        palette = self._palette
-        if palette is not None:
-            return tuple(chain.from_iterable(col[:3] for col in palette))
-        else:
-            return None
-
-    def export_palette_alpha_bytes(self) -> Optional[bytes]:
-        """return palette alpha as bytes, for use in exporting to an image format
-
-        :return: None if no palette, or bytes of palette entries' alpha
-        """
-        palette = self._palette
-        if palette is None:
-            return None
-        # convert alpha: alpha255 = floor(alpha128/128*255)
-        alphas255 = (int(col[3] / 128 * 255) for col in palette)
-        # occasional super-opaque values need to be clamped to 255
-        return bytes(a if a <= 255 else 255 for a in alphas255)
-
-    def export_pixels(self) -> Union[SeqRGB, SeqRGBA, SeqIndexed]:
-        """return pixels for use in exporting to an image format
-
-        :return Sequence of indices into the palette if there is a palette, or
-            sequence of (r,g,b) or (r,g,b,a) colors. For rgba, alpha values will have
-            been converted from 128-based alpha to 255-based alpha
-        """
-        pixels = self._pixels
-        if not pixels:
+    @property
+    def pixels128(self) -> Union[SeqRGB, SeqRGBA, SeqIndexed]:
+        """pixels with 128-based alpha"""
+        if not self.pixels:
             return []
-        if self._palette is None and len(pixels[0]) == 4:  # convert RGBA alpha
-            # convert alpha: floor(alpha128/128*255)
-            return [(r, g, b, int(a / 128 * 255)) for (r, g, b, a) in pixels]
-        else:  # don't convert indexed pixels or RGB
-            return pixels
+        if self.palette is None and len(self.pixels[0]) == 4:  # RGBA
+            if self.alpha255:
+                # get alpha128 = ceil(alpha255/255*128)
+                return [
+                    (r, g, b, int(a255 / 255 * 128 + 0.5))
+                    for (r, g, b, a255) in self.pixels
+                ]
+            elif self.alpha128:
+                return self.pixels
+        else:  # RGB or indexed
+            return self.pixels
+
+    @property
+    def pixels255(self) -> Union[SeqRGB, SeqRGBA, SeqIndexed]:
+        """pixels with 255-based alpha"""
+        if not self.pixels:
+            return []
+        if self.palette is None and len(self.pixels[0]) == 4:  # RGBA
+            if self.alpha128:
+                # get alpha255 = floor(alpha128/128*255)
+                return [
+                    (r, g, b, int(a128 / 128 * 255)) for (r, g, b, a128) in self.pixels
+                ]
+            elif self.alpha255:
+                return self.pixels
+        else:  # RGB or indexed
+            return self.pixels
 
 
 def read_imx(fp: BinaryFp) -> ImxImage:
@@ -269,14 +278,14 @@ def write_imx(imximage: ImxImage, fp: BinaryFp) -> None:
 
         # palette
         if imximage.pixfmt in ("i4", "i8"):
-            palette = imximage.palette
+            palette = imximage.palette128
             palette_num_bytes = len(palette) * 4
             writestruct(file, "<I", palette_num_bytes)
             writestruct(file, f"{palette_num_bytes}B", *chain.from_iterable(palette))
             writestruct(file, "<I", 2)
 
         # pixels
-        pixels = imximage.pixels
+        pixels = imximage.pixels128
         if imximage.pixfmt == "i8":
             pixels_flat = pixels  # already flat
         elif imximage.pixfmt == "i4":
@@ -312,8 +321,8 @@ def read_from_png(fp: BinaryFp, pixfmt: Optional[str] = None) -> ImxImage:
 
         # Choose a pixel format automatically if none is provided
         if pixfmt is None:
-
             num_colors = image.getcolors()
+            num_colors = None if num_colors is None else len(num_colors)
 
             # If few enough colors for i4, do that (but only if width is even)
             if num_colors is not None and (num_colors <= 16) and (width % 2 == 0):
@@ -393,6 +402,13 @@ def image2indexed(
 
     # if colors exceed maxcolors, use Pillow's built-in quantization to reduce colors.
     if imgcolors is None:  # i.e. if getcolors() exceeded maxcolors
+
+        # Sometimes the same image will quantize better from RGB mode than from RGBA
+        # (see https://github.com/python-pillow/Pillow/issues/5217)
+        # Therefore, convert to RGB before quantization if there is no alpha
+        no_alpha = all(a == 255 for a in image.getdata(band=3))
+        if no_alpha:
+            image = image.convert("RGB")
         image = image.quantize(colors=maxcolors, dither="FLOYDSTEINBERG")
 
         # warn if there was excessive color reduction (due to a possible Pillow bug)
@@ -408,8 +424,8 @@ def image2indexed(
         imgcolors = image.getcolors(maxcolors=maxcolors)
 
     # now that colors are reduced sufficiently, do manual pixel/palette extraction
-    # TODO: now would be the time to rearrange palette to match an existing IMX palette
-    palette = [color for count, color in imgcolors]
+    # (palette is sorted from most to least used colors)
+    palette = [color for count, color in sorted(imgcolors, reverse=True)]
     color2pixel = {color: idx for idx, color in enumerate(palette)}
     pixels = [color2pixel[color] for color in image.getdata()]
     return pixels, palette
@@ -422,14 +438,16 @@ def write_to_png(imximage: ImxImage, fp: BinaryFp) -> None:
     :param fp: A file path or an already-opened file
     """
     if imximage.haspalette:
-        image = Image.new("P", imximage.size)
-        image.putpalette(imximage.export_palette_rgb_flat())
-        image.info["transparency"] = imximage.export_palette_alpha_bytes()
+        image = Image.new("RGBA", imximage.size)
+        imx_palette = imximage.palette255
+        imx_pixels_rgba = [imx_palette[i] for i in imximage.pixels]
+        image.putdata(imx_pixels_rgba)
     elif imximage.hasalpha:
         image = Image.new("RGBA", imximage.size)
+        image.putdata(imximage.pixels255)
     else:
         image = Image.new("RGB", imximage.size)
-    image.putdata(imximage.export_pixels())
+        image.putdata(imximage.pixels255)
 
     image.save(fp, format="png")
 

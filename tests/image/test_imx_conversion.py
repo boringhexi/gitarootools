@@ -8,7 +8,7 @@ from shlex import split as shlex_split
 
 from gitarootools.cmdline.imx2png import main as run_imx2png
 from gitarootools.cmdline.png2imx import main as run_png2imx
-from tests.common import images_identical, make_contents2destdir
+from tests.common import images_identical, make_contents2destdir, imx_images_identical
 
 testdatapkg_parent = "tests.image.test_imx_conversion_data"
 
@@ -79,12 +79,12 @@ def test_png2imx(tmpdir, capsys):
 
     # 4. prepare paths for file & dir comparison
     actual_output_dir = output_dir_arg
-    expected_ouput_dir = tmpdir.join("expected_output")
+    expected_output_dir = tmpdir.join("expected_output")
+    actual_imxs = glob(str(actual_output_dir.join("*.IMX")))
+    expected_imxs = glob(str(expected_output_dir.join("*.IMX")))
 
-    # 5. check that the expected and actual output files are identical
-    cmpdirs = filecmp.dircmp(actual_output_dir, expected_ouput_dir)
-    match, mismatch, errors = filecmp.cmpfiles(
-        actual_output_dir, expected_ouput_dir, cmpdirs.common, shallow=False
-    )
-    assert not mismatch
-    assert not errors
+    # 5. Compare actual output IMXs to expected output IMXs
+    assert len(actual_imxs) == len(expected_imxs)
+    for actualimx, expectedimx in zip(sorted(actual_imxs), sorted(expected_imxs)):
+        assert os.path.basename(actualimx) == os.path.basename(expectedimx)
+        assert imx_images_identical(actualimx, expectedimx)
