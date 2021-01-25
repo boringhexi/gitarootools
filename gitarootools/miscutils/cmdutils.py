@@ -127,3 +127,12 @@ def wrap_argparse_desc(text, width=None):
         indent = line[: len(line) - len(line.lstrip())]
         rettext.append(fill(line, width=width, subsequent_indent=indent))
     return "\n".join(rettext)
+
+
+def my_warn(message) -> None:
+    """print message to stderr as an orange-colored warning
+
+    :param message:
+    :return:
+    """
+    print(f"\033[93m{message!s}\033[0m", file=sys.stderr)

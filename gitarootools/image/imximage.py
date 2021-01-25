@@ -9,10 +9,10 @@ import pathlib
 from itertools import chain
 from os import SEEK_CUR
 from typing import AnyStr, BinaryIO, Optional, Sequence, Tuple, Union
-from warnings import warn
 
 from PIL import Image
 
+from gitarootools.miscutils.cmdutils import my_warn
 from gitarootools.miscutils.datautils import (
     chunks,
     from_nibbles,
@@ -47,12 +47,6 @@ class ImxImageError(Exception):
 
 class EndOfImxImageError(ImxImageError, EOFError):
     """raised when the end of an IMX image is reached unexpectedly"""
-
-    pass
-
-
-class ExcessiveColorReductionWarning(UserWarning):
-    """warning issued when Pillow color reduction goes too far"""
 
     pass
 
@@ -414,11 +408,10 @@ def image2indexed(
         # warn if there was excessive color reduction (due to a possible Pillow bug)
         num_destcolors = len(image.getcolors(maxcolors=maxcolors))
         if imagename is not None and (num_destcolors < maxcolors):
-            warn(
-                f"{imagename} was reduced to {num_destcolors} colors instead of "
+            my_warn(
+                f"WARNING: {imagename} reduced to {num_destcolors} colors instead of "
                 f"{maxcolors} (due to a possible Pillow bug). To avoid this, manually "
-                f"reduce your image to {maxcolors} or fewer colors before converting.",
-                category=ExcessiveColorReductionWarning,
+                f"reduce your image to {maxcolors} or fewer colors before converting."
             )
         image = image.convert("RGBA")
         imgcolors = image.getcolors(maxcolors=maxcolors)
