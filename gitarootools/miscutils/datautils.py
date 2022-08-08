@@ -2,18 +2,10 @@
 #  Copyright (c) 2019, 2020 boringhexi
 """datautils.py - utility functions for handling data"""
 
-import contextlib
 import struct
+from contextlib import nullcontext
 from math import ceil
 from typing import Any, AnyStr, BinaryIO, Iterable
-
-if hasattr(contextlib, "nullcontext"):
-    nullcontext = contextlib.nullcontext
-else:
-    # Python 3.6 compatible equivalent
-    @contextlib.contextmanager
-    def nullcontext(as_value=None):
-        yield as_value
 
 
 def chunks(seq, n, fillseq=None):

@@ -3,17 +3,12 @@
 """common.py - common utils and such for the gitarootools test suite"""
 
 import os
+from importlib import resources as importlib_resources
 from typing import Optional
 
 from PIL import Image
 
 from gitarootools.image.imximage import read_imx
-
-try:
-    # noinspection PyProtectedMember
-    from importlib import resources as importlib_resources
-except ImportError:
-    import importlib_resources  # Python 3.6 compatible
 
 
 class ResourceCopier:
