@@ -1,5 +1,8 @@
 # Changelog
 
+upcoming version:
+- todo
+
 0.1.5:
 - (gm-png2imx) regarding color quantization (converting to a 256- or 16-color image) and
   [Pillow issue #5204](https://github.com/python-pillow/Pillow/issues/5204) (where
