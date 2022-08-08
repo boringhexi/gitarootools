@@ -1,6 +1,6 @@
 # Changelog
 
-upcoming version:
+0.1.5:
 - (gm-png2imx) regarding color quantization (converting to a 256- or 16-color image) and
   [Pillow issue #5204](https://github.com/python-pillow/Pillow/issues/5204) (where
   quantization reduces colors too much in some cases, usually affecting images that have
@@ -8,6 +8,7 @@ upcoming version:
   - A warning will be printed if an image is negatively impacted by  Pillow issue #5204.
   - An input image that already has few enough colors (256/16 or fewer) will no longer
     be impacted by Pillow issue #5204.
+- drop support for Python 3.6
 
 0.1.4:
 - now works with Python 3.9
