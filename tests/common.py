@@ -17,7 +17,7 @@ from typing import Optional
 
 from PIL import Image
 
-from gitarootools.image.imximage import read_imx
+from gitarootools.image.imximage import SeqIndexed, read_imx
 
 
 class ResourceCopier:
@@ -116,10 +116,7 @@ class ResourceCopier:
         if importlib_resources_legacy:
             contents_ = importlib_resources.contents(srcpkg)
         else:
-            contents_ = (
-                resource.name
-                for resource in files(srcpkg).iterdir()
-            )
+            contents_ = (resource.name for resource in files(srcpkg).iterdir())
 
         created_real_destdir = False
         for resource in contents_:
@@ -212,8 +209,10 @@ def imx_images_identical(path1, path2):
     assert imximage1.size == imximage2.size
     if imximage1.haspalette:
         pal1, pal2 = imximage1.palette, imximage2.palette
-        imx_pixels_rgba1 = (pal1[i] for i in imximage1.pixels)
-        imx_pixels_rgba2 = (pal2[i] for i in imximage2.pixels)
+        pixels1: SeqIndexed = imximage1.pixels
+        pixels2: SeqIndexed = imximage2.pixels
+        imx_pixels_rgba1 = (pal1[i] for i in pixels1)
+        imx_pixels_rgba2 = (pal2[i] for i in pixels2)
         assert all(
             rgba1 == rgba2 for rgba1, rgba2 in zip(imx_pixels_rgba1, imx_pixels_rgba2)
         )
