@@ -9,11 +9,11 @@ repository = "https://github.com/boringhexi/gitarootools"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-tomlkit = "^0.11.2 "
-pillow = "^9.2.0"
+tomlkit = "^0.11.7 "
+pillow = "^9.5.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.1.2"
+pytest = "^7.3.0"
 
 [tool.poetry.scripts]
 gm-imcpack = "gitarootools.cmdline.imcpack:main"
@@ -27,5 +27,5 @@ gm-imx2png = "gitarootools.cmdline.imx2png:main"
 gm-png2imx = "gitarootools.cmdline.png2imx:main"
 
 [build-system]
-requires = ["poetry>=1.1.14"]
+requires = ["poetry>=1.4.2"]
 build-backend = "poetry.masonry.api"
