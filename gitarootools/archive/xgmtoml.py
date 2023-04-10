@@ -25,22 +25,23 @@ class XgmTomlError(Exception):
     pass
 
 
-# TODO expand help text
 _toml_header = """\
-# Welcome to the gm-xgmpack repacking file, for all your XGM repacking needs!
+# This is a list of all images and models extracted from the XGM container.
+# Use gm-xgmpack to repack everything back into an XGM file.
 # Try opening this file in a programmer's text editor for handy color highlighting
 # (your editor may need a plugin for TOML support first).
 
-["Item Help/Guide"]
-    # An ImageItem contains just an .IMX image file.
-    # A ModelItem contains both .XG model and .animsep (animation separation) files.
+["Help/Guide"]
+    # An [[ImageItem]] is an .IMX image file.
+    # A [[ModelItem]] is an .XG model and its .animsep (animation separation) file.
 
     name16 = "MODEL.XG"
-    # name16: Unless you use an advanced option below, this is the IMX or XG/animsep
-    # files to use. Also used internally by the game, so it must be 16 ascii characters
-    # or fewer.
+    # name16: The filename of the IMX or XG/animsep file to use. The game uses this name
+    # internally, so it must be 16 ascii characters or fewer.
 
-    # Advanced options: fine control over the file(s) to use.
+    # For 99% of cases, that's all you need to use.
+
+    # Advanced options: finer control over which files to use.
     # By default, name16="MODEL.XG" will use MODEL.XG and MODEL.animsep.
     # Use the following if the real filename is different or is in another directory.
 

@@ -63,8 +63,8 @@ def test_xgmunpack(tmpdir, capsys):
     toml_actual_output = tomlkit.parse(read_text(toml_actual_output_path))
     toml_expected_output = tomlkit.parse(read_text(toml_expected_output_path))
     # before comparing, remove the guide/help section if it exists
-    toml_actual_output.pop("Item Help/Guide", None)
-    toml_expected_output.pop("Item Help/Guide", None)
+    toml_actual_output.pop("Help/Guide", None)
+    toml_expected_output.pop("Help/Guide", None)
     assert toml_actual_output == toml_expected_output
 
 
