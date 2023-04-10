@@ -3,7 +3,16 @@
 """common.py - common utils and such for the gitarootools test suite"""
 
 import os
-from importlib import resources as importlib_resources
+
+try:
+    from importlib.resources import files
+
+    importlib_resources_legacy = False
+except ImportError:
+    # before Python 3.9
+    from importlib import resources as importlib_resources
+
+    importlib_resources_legacy = True
 from typing import Optional
 
 from PIL import Image
@@ -77,7 +86,11 @@ class ResourceCopier:
         # 3. Copy importlib resource to self.destdir/subdir
         resource_destpath = os.path.join(real_destdir, resource)
         with open(resource_destpath, "wb") as resource_destfile:
-            resource_destfile.write(importlib_resources.read_binary(srcpkg, resource))
+            if importlib_resources_legacy:
+                bindata = importlib_resources.read_binary(srcpkg, resource)
+            else:
+                bindata = files(srcpkg).joinpath(resource).read_bytes()
+            resource_destfile.write(bindata)
 
         return resource_destpath
 
@@ -100,10 +113,22 @@ class ResourceCopier:
         real_destdir = self.make_subdir(subdir, create=False)
 
         # 3. Copy importlib resources to destdir/subdir
-        created_real_destdir = False
-        for resource in importlib_resources.contents(srcpkg):
-            if importlib_resources.is_resource(srcpkg, resource):
+        if importlib_resources_legacy:
+            contents_ = importlib_resources.contents(srcpkg)
+        else:
+            contents_ = (
+                resource.name
+                for resource in files(srcpkg).iterdir()
+            )
 
+        created_real_destdir = False
+        for resource in contents_:
+            if importlib_resources_legacy:
+                is_resource_ = importlib_resources.is_resource(srcpkg, resource)
+            else:
+                is_resource_ = files(srcpkg).joinpath(resource).is_file()
+
+            if is_resource_:
                 # only create a new subdir if we have something to copy into it
                 # (or if srcpkg only has __init__.py, we make a matching empty subdir)
                 if not created_real_destdir:
@@ -115,10 +140,14 @@ class ResourceCopier:
 
                 resource_destpath = os.path.join(real_destdir, resource)
                 with open(resource_destpath, "wb") as resource_destfile:
-                    resource_destfile.write(
-                        importlib_resources.read_binary(srcpkg, resource)
-                    )
+                    if importlib_resources_legacy:
+                        bindata = importlib_resources.read_binary(srcpkg, resource)
+                    else:
+                        bindata = files(srcpkg).joinpath(resource).read_bytes()
+                    resource_destfile.write(bindata)
             elif recursive:  # is a dir and we're descending into subpackages
+                if resource == "__pycache__":
+                    continue  # skip this dir
                 child_srcpkg = f"{srcpkg}.{resource}"
                 self.copy_contents_to_destdir(
                     srcpkg=child_srcpkg, subdir=resource, recursive=True
