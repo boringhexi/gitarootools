@@ -123,7 +123,7 @@ def readdata(file, size):
 def writestruct(file: BinaryIO, fmt: AnyStr, *values: Any) -> None:
     """write values to file according to struct fmt
 
-    :param file: file object with read(bytes) method
+    :param file: file object with write(bytes) method
     :param fmt: string struct format (see documentation for builtin struct module)
     :param values: values to write to file, must match fmt
     :return:
