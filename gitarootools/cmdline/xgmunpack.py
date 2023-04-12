@@ -81,7 +81,7 @@ file_US_XGM{s}file_US{XGMTOML_EXT}
       {parser.prog} -s _US file{XGM_EXT} file2{XGM_EXT}
 
   Example 5: Create unpacked dirs in different outer directory (e.g. unpack to \
-outerdir{s}file_IMC{s})
+outerdir{s}file_XGM{s})
       {parser.prog} -d outerdir file{XGM_EXT}"""
     )
     return parser
