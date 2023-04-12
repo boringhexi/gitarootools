@@ -21,6 +21,11 @@ XGMTOML_EXT = f"{_d}XGM{_d}toml"
 # *.XGM.TOML case insensitive:
 XGMTOML_EXT_GLOB = f"*{_d}[xX][gG][mM]{_d}[tT][oO][mM][lL]"
 ANIMSEP_EXT = f"{_d}animsep"
+# === Archive: PAK container extensions ===
+PAK_EXT = f"{_d}PAK"
+PAKTOML_EXT = f"{_d}PAK{_d}toml"
+# *.XGM.TOML case insensitive:
+PAKTOML_EXT_GLOB = f"*{_d}[pP][aA][kK]{_d}[tT][oO][mM][lL]"
 
 # === Image: IMX image extension ===
 IMX_EXT = f"{_d}IMX"
