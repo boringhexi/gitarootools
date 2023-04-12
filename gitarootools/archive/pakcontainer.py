@@ -48,29 +48,29 @@ class PakContainer:
 
 
 def read_pak(
-    pakfile: Union[AnyStr, BinaryIO],
+    pakfile_or_path: Union[AnyStr, BinaryIO],
     pakfilesize: Optional[int] = None,
-    ssqfile: Union[None, AnyStr, BinaryIO] = None,
+    ssqfile_or_path: Union[None, AnyStr, BinaryIO] = None,
 ) -> PakContainer:
     """read from file and return a PakContainer
 
-    :param pakfile: A PAK file path. Or it can be an already-opened file, in which case:
+    :param pakfile_or_path: A PAK file path. Or an already-opened file, in which case:
         - data will be read starting from the current file position
         - after returning, file position is at the end of the last item's data
         - the caller is responsible for closing the file afterwards
     :param pakfilesize: Usually the pakfile's size will be determined by seeking
         to the end of the file. If this is not feasible (e.g. pakfile is contained
         within a larger file), use this to pass the pakfile's true size.
-    :param ssqfile: An optional SSQ file path (or already-opened file, following the
-        same rules as pakfile) from which to pull a list of filenames to name the PAK
-        container's files. Without this, the files will be named in increasing numeric
-        order instead.
+    :param ssqfile_or_path: An optional SSQ file path (or already-opened file, following
+        the same rules as pakfile_or_path) from which to pull a list of filenames to
+        name the PAK container's files. Without this, the files will be named in
+        increasing numeric order instead.
     :return: PakContainer instance
     """
 
-    with open_maybe(pakfile, "rb") as pakfile:
-        if ssqfile is not None:
-            with open_maybe(ssqfile, "rb") as ssqfile:
+    with open_maybe(pakfile_or_path, "rb") as pakfile:
+        if ssqfile_or_path is not None:
+            with open_maybe(ssqfile_or_path, "rb") as ssqfile:
                 itemnames = read_ssq_itemnames_gmo(ssqfile)
             itemsizes = readstruct(pakfile, f"<{len(itemnames)}I")
 
@@ -133,17 +133,19 @@ def read_ssq_itemnames_gmo(file: BinaryIO) -> Sequence[str]:
         if not is_clone:
             xg_name = replaceext(xg_name, ".gmo", ".XG")
             itemnames.append(xg_name)
-        file.seek(0x1c, SEEK_CUR)
+        file.seek(0x1C, SEEK_CUR)
     return itemnames
 
 
 def write_pak(
-    pak: PakContainer, file: Union[AnyStr, BinaryIO], progressfunc: Callable = None
+    pak: PakContainer,
+    file_or_path: Union[AnyStr, BinaryIO],
+    progressfunc: Callable = None,
 ) -> None:
     """write a PakContainer to file
 
     :param pak: PakContainer object
-    :param file: A file path. Or it can be an already-opened file, in which case:
+    :param file_or_path: A file path. Or an already-opened file, in which case:
         * data will be written starting from the current file position
         * after returning, file position is at the end of the last item's data
         * the caller is responsible for closing the file afterwards
@@ -151,7 +153,7 @@ def write_pak(
       to be processed. It must accept three arguments: an int item index, an int total
       number of items, and a PakModelItem instance
     """
-    with open_maybe(file, "wb") as file:
+    with open_maybe(file_or_path, "wb") as file:
         for item in pak.modelitems:
             writestruct(file, "<I", item.filesize)
         num_modelitems = len(pak.modelitems)

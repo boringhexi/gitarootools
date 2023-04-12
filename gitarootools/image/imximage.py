@@ -197,10 +197,10 @@ class ImxImage:
             return self.pixels
 
 
-def read_imx(fp: BinaryFp) -> ImxImage:
+def read_imx(file_or_path: BinaryFp) -> ImxImage:
     """read from an IMX image file and return an ImxImage
 
-    :param fp: A file path. Or it can be an already-opened file, in which case:
+    :param file_or_path: A file path. Or an already-opened file, in which case:
         - it will read starting from the current file position
         - after returning, file position will be right after the IMX file data
         - the caller is responsible for closing the file afterwards
@@ -208,7 +208,7 @@ def read_imx(fp: BinaryFp) -> ImxImage:
     :raises EndOfImxImageError if end of IMX data is reached unexpectedly
     :return: ImxImage instance
     """
-    with open_maybe(fp, "rb") as file:
+    with open_maybe(file_or_path, "rb") as file:
         try:
             magic = readdata(file, 4)
             if magic != b"IMX\0":
@@ -255,16 +255,16 @@ def read_imx(fp: BinaryFp) -> ImxImage:
     return ImxImage(width, height, pixels, palette, pixfmt=pixfmt, alpha128=True)
 
 
-def write_imx(imximage: ImxImage, fp: BinaryFp) -> None:
+def write_imx(imximage: ImxImage, file_or_path: BinaryFp) -> None:
     """write imximage to file
 
     :param imximage: an ImxImage instance
-    :param fp: A file path. Or it can be an already-opened file, in which case:
+    :param file_or_path: A file path. Or an already-opened file, in which case:
         - it will write starting from the current file position
         - after returning, file position will be right after the written IMX data
         - the caller is responsible for closing the file afterwards
     """
-    with open_maybe(fp, "wb") as file:
+    with open_maybe(file_or_path, "wb") as file:
         # header
         file.write(b"IMX\0")
         pixfmtdata = _pixfmt_pixfmtdata[imximage.pixfmt]

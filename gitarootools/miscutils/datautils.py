@@ -131,7 +131,7 @@ def writestruct(file: BinaryIO, fmt: AnyStr, *values: Any) -> None:
     file.write(struct.pack(fmt, *values))
 
 
-def open_maybe(file, mode="r", **kwargs):
+def open_maybe(file_or_path, mode="r", **kwargs):
     """a drop-in replacement for open() that can also take an already-opened file
 
     Like open(), open_maybe() can be used in a with statement.
@@ -141,11 +141,11 @@ def open_maybe(file, mode="r", **kwargs):
       with statement ends.
     """
     # check if it's already a file
-    if hasattr(file, "read") or hasattr(file, "write"):
-        return nullcontext(file)
+    if hasattr(file_or_path, "read") or hasattr(file_or_path, "write"):
+        return nullcontext(file_or_path)
     else:
         # it's not already a file, so open one
-        return open(file, mode, **kwargs)
+        return open(file_or_path, mode, **kwargs)
 
 
 def clamp(val, min_, max_):

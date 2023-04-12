@@ -171,16 +171,16 @@ class ImcContainer:
         return len(self.csubsongs)
 
 
-def read_imc(file):
-    """ read from a IMC audio container file and return an ImcContainer
+def read_imc(file_or_path):
+    """read from a IMC audio container file and return an ImcContainer
 
-    file: A file path. Or it can be an already-opened file, in which case:
+    file_or_path: A file path. Or an already-opened file, in which case:
     - it will read starting from the current file position, with no guarantee of file
       position after returning
     - the caller is responsible for closing the file afterwards
     raises: EOFError if end of file is reached unexpectedly
     """
-    with open_maybe(file, "rb") as file:
+    with open_maybe(file_or_path, "rb") as file:
         start_offset = file.tell()
 
         # read number of subsongs
@@ -215,11 +215,11 @@ def read_imc(file):
         return ImcContainer(csubsongs)
 
 
-def write_imc(imccontainer, file, progressfunc=None):
+def write_imc(imccontainer, file_or_path, progressfunc=None):
     """write an ImcContainer to an IMC audio container file
 
     imccontainer: an ImcContainer object
-    file: A file path. Or it can be an already-opened file, in which case:
+    file_or_path: A file path. Or an already-opened file, in which case:
     - it will write starting from the current file position, with no guarantee of file
       position after returning
     - the caller is responsible for closing the file afterwards
@@ -227,7 +227,7 @@ def write_imc(imccontainer, file, progressfunc=None):
       be processed. It must accept three arguments: an int subsong index, an int total
       number of subsongs, and an imccontainer.ContainerSubsong instance
     """
-    with open_maybe(file, "wb") as file:
+    with open_maybe(file_or_path, "wb") as file:
         start_offset = file.tell()  # in case we're reading from inside an ISO file, etc
 
         # write num_subsongs

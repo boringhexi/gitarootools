@@ -39,16 +39,16 @@ class XgmContainer:
         self.modelitems = modelitems
 
 
-def read_xgm(file: Union[AnyStr, BinaryIO]) -> XgmContainer:
+def read_xgm(file_or_path: Union[AnyStr, BinaryIO]) -> XgmContainer:
     """read from file and return an XgmContainer
 
-    :param file: A file path. Or it can be an already-opened file, in which case:
+    :param file_or_path: A file path. Or an already-opened file, in which case:
         * data will be read starting from the current file position
         * after returning, file position is at the end of the last item's data
         * the caller is responsible for closing the file afterwards
     :return: XgmContainer instance
     """
-    with open_maybe(file, "rb") as file:
+    with open_maybe(file_or_path, "rb") as file:
         num_imageitems, num_modelitems = readstruct(file, "<II")
         imageitems = [read_imageitem(file) for _ in range(num_imageitems)]
         modelitems = [read_modelitem(file) for _ in range(num_modelitems)]
@@ -56,12 +56,14 @@ def read_xgm(file: Union[AnyStr, BinaryIO]) -> XgmContainer:
 
 
 def write_xgm(
-    xgm: XgmContainer, file: Union[AnyStr, BinaryIO], progressfunc: Callable = None
+    xgm: XgmContainer,
+    file_or_path: Union[AnyStr, BinaryIO],
+    progressfunc: Callable = None,
 ) -> None:
     """write an XgmContainer to file
 
     :param xgm: XgmContainer object
-    :param file: A file path. Or it can be an already-opened file, in which case:
+    :param file_or_path: A file path. Or an already-opened file, in which case:
         * data will be written starting from the current file position
         * after returning, file position is at the end of the last item's data
         * the caller is responsible for closing the file afterwards
@@ -69,7 +71,7 @@ def write_xgm(
       to be processed. It must accept three arguments: an int item index, an int total
       number of items, and an xgmitem.XgmImageItem/XgmModelItem instance
     """
-    with open_maybe(file, "wb") as file:
+    with open_maybe(file_or_path, "wb") as file:
         num_imageitems, num_modelitems = len(xgm.imageitems), len(xgm.modelitems)
         file.write(struct.pack("<II", num_imageitems, num_modelitems))
         for i, item in enumerate(xgm.imageitems):

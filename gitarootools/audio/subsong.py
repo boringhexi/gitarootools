@@ -524,10 +524,10 @@ def write_subsong(subsong, filepath):
         return write_subwav16(subsong, filepath)
 
 
-def read_subimc(file, knownsize=None):
+def read_subimc(file_or_path, knownsize=None):
     """read from a IMC subsong file and return a Subsong
 
-    file: A file path. Or it can be an already-opened file, in which case:
+    file_or_path: A file path. Or an already-opened file, in which case:
     - it will read starting from the current file position
     - after returning, file position will be right after the subsong file data
     - the caller is responsible for closing the file afterwards
@@ -539,7 +539,7 @@ def read_subimc(file, knownsize=None):
     - SubsongError if IMC subsong header is invalid
     - EndOfSubsongError if end of subsong is reached unexpectedly
     """
-    with open_maybe(file, "rb") as file:
+    with open_maybe(file_or_path, "rb") as file:
         # Read imc subsong header
         header = file.read(16)
         if len(header) != 16:
@@ -648,16 +648,16 @@ def read_subwav16(file):
     return Subsong(channels, sample_rate)
 
 
-def write_subimc(subsong, file):
+def write_subimc(subsong, file_or_path):
     """write a Subsong to IMC subsong file
 
     subsong: a Subsong instance
-    file: A file path. Or it can be an already-opened file, in which case:
+    file_or_path: A file path. Or an already-opened file, in which case:
     - it will write starting from the current file position. After returning, the file
       position will be at the end of the IMC subsong data it just wrote.
     - the caller is responsible for closing the file afterwards
     """
-    with open_maybe(file, "wb") as file:
+    with open_maybe(file_or_path, "wb") as file:
         file.write(subsong.get_imcdata())
 
 
