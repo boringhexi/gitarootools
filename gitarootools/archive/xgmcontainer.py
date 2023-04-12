@@ -76,7 +76,7 @@ def write_xgm(
             if progressfunc is not None:
                 progressfunc(i, num_imageitems, item)
             write_imageitem(item, file)
-        for item in xgm.modelitems:
+        for i, item in enumerate(xgm.modelitems):
             if progressfunc is not None:
                 progressfunc(i, num_modelitems, item)
             write_modelitem(item, file)
