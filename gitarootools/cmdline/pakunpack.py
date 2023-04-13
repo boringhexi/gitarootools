@@ -135,7 +135,7 @@ def main(args=tuple(sys.argv[1:])):
         # unpack PAK container file
         if parsed_args.verbose:
             print(f"unpacking {inpath!r} -> {output_dirpath!r}")
-        pakc = read_pak(inpath, ssqfile=ssqpath)
+        pakc = read_pak(inpath, ssqfile_or_path=ssqpath)
         write_pak_to_toml(
             pakc, output_dirpath, output_tomlbase, progressfunc=verbosefunc,
         )
