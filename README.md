@@ -24,6 +24,10 @@ gm-<toolname> -h
 
 **`gm-xgmunpack`**: unpack files from an XGM container
 
+**`gm-pakpack`**: pack files into a PAK container (Gitaroo Man Lives)
+
+**`gm-pakunpack`**: unpack files from a PAK container (Gitaroo Man Lives)
+
 ### Audio
 
 **`gm-imcpack`**: pack subsongs into an IMC audio container
@@ -39,6 +43,10 @@ gm-<toolname> -h
 **`gm-imx2png`**: convert IMX images to PNG
 
 **`gm-png2imx`**: convert PNG images to IMX
+
+### Other
+
+**`gm-gmo2animnames`**: extract animation names from a GMO model (Gitaroo Man Lives)
 
 ## Resources
 * [Gitaroo Pals](https://discord.gg/ed6P8Jt) Discord server for help and support
