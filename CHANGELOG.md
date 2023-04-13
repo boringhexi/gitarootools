@@ -1,6 +1,7 @@
 # Changelog
 
-upcoming version:
+0.1.7:
+- (gm-pakunpack) fix gm-pakunpack not working
 
 0.1.6:
 - (gm-gmo2animnames) add tool gmo2animnames to extract animation names from GMO models
