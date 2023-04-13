@@ -16,6 +16,7 @@ pillow = "^9.5.0"
 pytest = "^7.3.0"
 
 [tool.poetry.scripts]
+gm-gmo2animnames = "gitarootools.cmdline.gmo2animnames:main"
 gm-imcpack = "gitarootools.cmdline.imcpack:main"
 gm-imcunpack = "gitarootools.cmdline.imcunpack:main"
 gm-pakpack = "gitarootools.cmdline.pakpack:main"
