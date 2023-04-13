@@ -1,7 +1,10 @@
 # Changelog
 
 upcoming version:
-- todo
+- 0.1.6:
+- (gm-gmo2animnames) add tool gmo2animnames to extract animation names from GMO models
+- (gm-pakpack/pakunpack) add tools gm-pakpack/pakunpack for Gitaroo Man Lives! PAK files
+- Support for Python 3.10 and 3.11
 
 0.1.5:
 - (gm-png2imx) regarding color quantization (converting to a 256- or 16-color image) and
