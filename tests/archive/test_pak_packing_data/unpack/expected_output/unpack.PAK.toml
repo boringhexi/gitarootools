@@ -1,0 +1,20 @@
+# This is a list of all images and models extracted from the PAK container.
+# Use gm-pakpack to repack everything back into an PAK file.
+# Try opening this file in a programmer's text editor for handy color highlighting
+# (your editor may need a plugin for TOML support first).
+
+["Help/Guide"]
+    # A [[ModelItem]] is a .gmo model.
+
+    file-path = "MODEL.gmo"
+    # file-path: filename of the GMO model.
+    # Or can be a file path to a model in a different directory, e.g. models/MODEL.gmo
+
+[[ModelItem]]
+file-path = "A.gmo"
+
+[[ModelItem]]
+file-path = "B.gmo"
+
+[[ModelItem]]
+file-path = "C.gmo"
