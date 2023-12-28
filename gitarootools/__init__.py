@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 #  Copyright (c) 2019, 2020 boringhexi
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
