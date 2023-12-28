@@ -1,6 +1,8 @@
 # Changelog
 
-upcoming version:
+0.1.8:
+- (gm-xgmpack) fix error when packing XGM.toml that contains no ModelItems
+- (gm-pakpack/unpack) add tests
 
 0.1.7:
 - (gm-pakunpack) fix gm-pakunpack not working
