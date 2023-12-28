@@ -11,6 +11,12 @@ The easiest way to install `gitarootools` is to use `pip`:
 pip install gitarootools
 ```
 
+## Updating
+To update to a new version of gitarootools:
+```bash
+pip install --upgrade gitarootools
+```
+
 ## Usage
 See each tool's help and usage by running
 ```bash

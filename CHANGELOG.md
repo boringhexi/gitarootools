@@ -1,6 +1,7 @@
 # Changelog
 
 upcoming version:
+- add README.md note about how to update to a new version
 
 0.1.8:
 - (gm-xgmpack) fix error when packing XGM.toml that contains no ModelItems
