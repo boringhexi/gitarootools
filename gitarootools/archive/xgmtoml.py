@@ -66,39 +66,38 @@ def read_toml(tomlpath: AnyStr) -> XgmContainer:
     with open(tomlpath, "rt", encoding="utf-8") as tomlfile:
         tomldoc = tomlkit.parse(tomlfile.read())
 
-    if not ("ImageItem" in tomldoc or "ModelItem" in tomldoc):
-        return XgmContainer([], [])
-
     imageitems = []
-    for tomlimage in tomldoc["ImageItem"]:
-        # 1. read ImageItem info from TOML
-        name16 = tomlimage["name16"]
-        filepath = tomlimage.get("file-path")
-        if filepath is None:
-            filepath = name16
-        # 2. read file data
-        with open(os.path.join(tomldir, filepath), "rb") as itemfile:
-            filedata = itemfile.read()
-        # 3. Convert to XgmImageItem
-        imageitems.append(XgmImageItem(name16, filedata))
+    if "ImageItem" in tomldoc:
+        for tomlimage in tomldoc["ImageItem"]:
+            # 1. read ImageItem info from TOML
+            name16 = tomlimage["name16"]
+            filepath = tomlimage.get("file-path")
+            if filepath is None:
+                filepath = name16
+            # 2. read file data
+            with open(os.path.join(tomldir, filepath), "rb") as itemfile:
+                filedata = itemfile.read()
+            # 3. Convert to XgmImageItem
+            imageitems.append(XgmImageItem(name16, filedata))
 
     modelitems = []
-    for tomlmodel in tomldoc["ModelItem"]:
-        # 1. read ImageItem info from TOML
-        name16 = tomlmodel["name16"]
-        filepath = tomlmodel.get("file-path")
-        if filepath is None:
-            filepath = name16
-        animseppath = tomlmodel.get("animsep-path")
-        if animseppath is None:
-            animseppath = replaceext(filepath, ANIMSEP_EXT)
-        # 2. read file data
-        with open(os.path.join(tomldir, filepath), "rb") as itemfile:
-            filedata = itemfile.read()
-        with open(os.path.join(tomldir, animseppath), "rb") as animsepfile:
-            animsepdata = animsepfile.read()
-        # 3. Convert to XgmModelItem
-        modelitems.append(XgmModelItem(name16, filedata, animsepdata))
+    if "ModelItem" in tomldoc:
+        for tomlmodel in tomldoc["ModelItem"]:
+            # 1. read ImageItem info from TOML
+            name16 = tomlmodel["name16"]
+            filepath = tomlmodel.get("file-path")
+            if filepath is None:
+                filepath = name16
+            animseppath = tomlmodel.get("animsep-path")
+            if animseppath is None:
+                animseppath = replaceext(filepath, ANIMSEP_EXT)
+            # 2. read file data
+            with open(os.path.join(tomldir, filepath), "rb") as itemfile:
+                filedata = itemfile.read()
+            with open(os.path.join(tomldir, animseppath), "rb") as animsepfile:
+                animsepdata = animsepfile.read()
+            # 3. Convert to XgmModelItem
+            modelitems.append(XgmModelItem(name16, filedata, animsepdata))
 
     return XgmContainer(imageitems, modelitems)
 
